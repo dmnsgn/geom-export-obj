@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "cameras": "./cameras.js",
+    "core-js": "./core-js.js",
+    "es-module-shims": "./es-module-shims.js",
+    "gl-matrix": "./gl-matrix.js",
+    "primitive-geometry": "./primitive-geometry.js",
+    "regl": "./regl.js"
+  }
+}

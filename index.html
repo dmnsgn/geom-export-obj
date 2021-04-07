@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>geom-export-obj by Damien Seguin (https://github.com/dmnsgn)</title>
+    <style>
+      :root {
+        --color-dark: #404040;
+        --color-light: #f2f2f2;
+        --color-accent: #fd5e62;
+      }
+
+      body {
+        margin: 0;
+        overscroll-behavior: none;
+        font-family: sans-serif;
+        color: var(--color-dark);
+        background-color: var(--color-light);
+      }
+
+      main {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      code {
+        display: block;
+        position: absolute;
+        box-sizing: border-box;
+        padding: 20px;
+        max-height: 100vh;
+        width: 100%;
+        columns: 4;
+        color: var(--color-light);
+
+      }
+    </style>
+  </head>
+  <body>
+    <main></main>
+    <script async src="web_modules/es-module-shims.js"></script>
+    <script src="web_modules/import-map.json" type="importmap"></script>
+
+    <script type="module">
+      import geomExportObj from "./index.js";
+      import { box, plane } from "primitive-geometry";
+
+      import createRegl from "regl";
+      import { mat4 } from "gl-matrix";
+      import { PerspectiveCamera, OrthographicCamera } from "cameras";
+
+      // Test geometries
+      const boxGeometry = box();
+      boxGeometry.name = `Box_Position_Cells`;
+
+      const planeGeometry = plane();
+      planeGeometry.name = `Plane_All`;
+
+      const planeNoUVsGeometry = plane();
+      delete planeNoUVsGeometry.uvs;
+      planeNoUVsGeometry.name = `Plane_No_UVs`;
+
+      const planeNoNormalsGeometry = plane();
+      delete planeNoNormalsGeometry.normals;
+      planeNoNormalsGeometry.name = `Plane_No_Normals`;
+
+      const geometries = [
+        boxGeometry,
+        planeGeometry,
+        planeNoUVsGeometry,
+        planeNoNormalsGeometry,
+      ];
+
+      const flattenGeometry = (geometry) => {
+        for (const property in geometry) {
+          if (["positions", "cells", "normals", "uvs"].includes(property)) {
+            geometry[property] = geometry[property].flat();
+          }
+        }
+        return geometry;
+      };
+
+      // Generate obj
+      const mainElement = document.querySelector("main")
+      const resultElement = document.createElement("code");
+      resultElement.innerText = geomExportObj(
+        geometries.map(flattenGeometry)
+      ).output;
+      mainElement.appendChild(resultElement);
+
+      // Camera
+      const regl = createRegl(mainElement);
+
+      const perspectiveCamera = new PerspectiveCamera({
+        position: [5, 5, 5],
+      });
+
+      const onResize = () => {
+        perspectiveCamera.aspect = window.innerWidth / window.innerHeight;
+        perspectiveCamera.updateProjectionMatrix();
+      };
+      onResize();
+
+      // Render
+      const drawGeometry = regl({
+        vert: /* glsl */ `
+  precision mediump float;
+
+  uniform mat4 model, view, projection;
+  attribute vec3 position, normal;
+  attribute vec2 uv;
+  varying vec3 vNormal;
+  varying vec2 vUv;
+
+  void main () {
+    vNormal = normal;
+    vUv = uv;
+    gl_Position = projection * view * model * vec4(position, 1.0);
+  }`,
+        frag: /* glsl */ `
+    precision mediump float;
+
+    varying vec3 vNormal;
+    varying vec2 vUv;
+
+    void main () {
+      gl_FragColor = vec4(vUv, 0.0, 1.0);
+      // gl_FragColor = vec4(vNormal * 0.5 + 0.5, 1.0);
+    }`,
+        attributes: {
+          position: regl.prop("positions"),
+          normal: regl.prop("normals"),
+          uv: regl.prop("uvs"),
+        },
+        elements: regl.prop("cells"),
+        uniforms: {
+          model: regl.prop("model"),
+          view: regl.prop("view"),
+          projection: regl.prop("projection"),
+        },
+      });
+
+      const frame = () => {
+        regl.clear({
+          color: [0.25, 0.25, 0.25, 1],
+        });
+
+        perspectiveCamera.update();
+
+        const offset = 2;
+        const gridSize = 2;
+        geometries.forEach((geometry, index) => {
+          const model = mat4.create();
+          mat4.translate(model, model, [
+            (index % gridSize) * offset,
+            0,
+            ~~(index / gridSize) * offset,
+          ]);
+
+          drawGeometry({
+            ...geometry,
+            normals: geometry.normals || geometry.positions.map(() => [0, 0, 1]),
+            uvs: geometry.uvs || geometry.positions.map(() => [1, 1]),
+            model,
+            projection: perspectiveCamera.projectionMatrix,
+            view: perspectiveCamera.viewMatrix,
+          });
+        });
+      };
+
+      function frameCatch(frameFunc) {
+        const loop = regl.frame((...args) => {
+          try {
+            frameFunc(...args);
+          } catch (err) {
+            loop.cancel();
+            throw err;
+          }
+        });
+      }
+
+      frameCatch(frame);
+
+      window.addEventListener("resize", onResize);
+    </script>
+  </body>
+</html>

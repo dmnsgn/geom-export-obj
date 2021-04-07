@@ -1,0 +1,43 @@
+{
+  "name": "geom-export-obj",
+  "version": "1.0.0",
+  "description": "Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs) into an OBJ string.",
+  "keywords": [
+    "geom",
+    "simplicial-complex",
+    "obj-exporter",
+    "wavefront",
+    "obj",
+    "exporter"
+  ],
+  "homepage": "https://github.com/dmnsgn/geom-export-obj",
+  "bugs": "https://github.com/dmnsgn/geom-export-obj/issues",
+  "repository": "dmnsgn/geom-export-obj",
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://paypal.me/dmnsgn"
+    },
+    {
+      "type": "individual",
+      "url": "https://commerce.coinbase.com/checkout/56cbdf28-e323-48d8-9c98-7019e72c97f3"
+    }
+  ],
+  "license": "MIT",
+  "author": "Damien Seguin (https://github.com/dmnsgn)",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "engines": {
+    "node": ">=15.0.0",
+    "npm": ">=7.0.0"
+  },
+  "devDependencies": {
+    "cameras": "^3.0.1",
+    "core-js": "^3.10.0",
+    "es-module-shims": "^0.10.3",
+    "gl-matrix": "^2.8.1",
+    "primitive-geometry": "^1.2.1",
+    "regl": "^2.1.0"
+  }
+}

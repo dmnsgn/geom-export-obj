@@ -28,10 +28,6 @@
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
-  "engines": {
-    "node": ">=15.0.0",
-    "npm": ">=7.0.0"
-  },
   "devDependencies": {
     "cameras": "^3.0.1",
     "core-js": "^3.10.0",
@@ -39,5 +35,9 @@
     "gl-matrix": "^2.8.1",
     "primitive-geometry": "^1.2.1",
     "regl": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=15.0.0",
+    "npm": ">=7.0.0"
   }
 }

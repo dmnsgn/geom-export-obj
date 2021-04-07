@@ -36,7 +36,124 @@ console.log(geomExportObj(cube()).output);
 
 <!-- api-start -->
 
-Auto-generated API content.
+## Modules
+
+<dl>
+<dt><a href="#module_geomExportObj">geomExportObj</a></dt>
+<dd></dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#SimplicialComplex">SimplicialComplex</a> : <code>Object</code></dt>
+<dd><p>Geometry definition. All optional.</p>
+</dd>
+<dt><a href="#GeomExportObjOffsets">GeomExportObjOffsets</a> : <code>Object</code></dt>
+<dd><p>Offsets to for cells. Useful if appending to another obj string. Used internally.</p>
+</dd>
+<dt><a href="#GeomExportObjOptions">GeomExportObjOptions</a> : <code>Object</code></dt>
+<dd><p>Options for exporter.</p>
+</dd>
+<dt><a href="#GeomExportObjReturnValue">GeomExportObjReturnValue</a> : <code>Object</code></dt>
+<dd></dd>
+</dl>
+
+<a name="module_geomExportObj"></a>
+
+## geomExportObj
+
+- [geomExportObj](#module_geomExportObj)
+  - [geomExportObj(geometries, [options])](#exp_module_geomExportObj--geomExportObj) ⇒ [<code>GeomExportObjReturnValue</code>](#GeomExportObjReturnValue) ⏏
+    - [~parse(geometry, [offsets], [defaultName])](#module_geomExportObj--geomExportObj..parse) ⇒ <code>string</code>
+
+<a name="exp_module_geomExportObj--geomExportObj"></a>
+
+### geomExportObj(geometries, [options]) ⇒ [<code>GeomExportObjReturnValue</code>](#GeomExportObjReturnValue) ⏏
+
+Parse one or more simplicial complex geometry and return an obj string and vertices offsets.
+
+**Kind**: Exported function
+
+| Param      | Type                                                                                                                       | Default         |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| geometries | [<code>SimplicialComplex</code>](#SimplicialComplex) \| [<code>Array.&lt;SimplicialComplex&gt;</code>](#SimplicialComplex) |                 |
+| [options]  | [<code>GeomExportObjOptions</code>](#GeomExportObjOptions)                                                                 | <code>{}</code> |
+
+<a name="module_geomExportObj--geomExportObj..parse"></a>
+
+#### geomExportObj~parse(geometry, [offsets], [defaultName]) ⇒ <code>string</code>
+
+Parse a simplicial complex and return an obj string
+
+**Kind**: inner method of [<code>geomExportObj</code>](#exp_module_geomExportObj--geomExportObj)  
+**See**: http://paulbourke.net/dataformats/obj/
+
+| Param         | Type                                                       | Default                                            | Description                                              |
+| ------------- | ---------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| geometry      | [<code>SimplicialComplex</code>](#SimplicialComplex)       |                                                    |                                                          |
+| [offsets]     | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }}</code> |                                                          |
+| [defaultName] | <code>string</code>                                        |                                                    | A name for the object if geometry.name is not specified. |
+
+<a name="SimplicialComplex"></a>
+
+## SimplicialComplex : <code>Object</code>
+
+Geometry definition. All optional.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name           | Type                              | Description               |
+| -------------- | --------------------------------- | ------------------------- |
+| positions      | <code>Array.&lt;number&gt;</code> |                           |
+| normals        | <code>Array.&lt;number&gt;</code> |                           |
+| uvs            | <code>Array.&lt;number&gt;</code> |                           |
+| cells          | <code>Array.&lt;number&gt;</code> |                           |
+| name           | <code>string</code>               | The object name.          |
+| [materialName] | <code>string</code>               | The object material name. |
+
+<a name="GeomExportObjOffsets"></a>
+
+## GeomExportObjOffsets : <code>Object</code>
+
+Offsets to for cells. Useful if appending to another obj string. Used internally.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name      | Type                |
+| --------- | ------------------- |
+| positions | <code>number</code> |
+| normals   | <code>number</code> |
+| uvs       | <code>number</code> |
+
+<a name="GeomExportObjOptions"></a>
+
+## GeomExportObjOptions : <code>Object</code>
+
+Options for exporter.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name      | Type                                                       | Default                                           | Description                         |
+| --------- | ---------------------------------------------------------- | ------------------------------------------------- | ----------------------------------- |
+| [header]  | <code>string</code>                                        | <code>&quot;# geom-export-obj\\n&quot;</code>     | Header to be prepended to the file. |
+| [prefix]  | <code>string</code>                                        | <code>&quot;Mesh\_&quot;</code>                   | Prefix for object names.            |
+| [offsets] | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }</code> | The initial offsets for cells.      |
+
+<a name="GeomExportObjReturnValue"></a>
+
+## GeomExportObjReturnValue : <code>Object</code>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name    | Type                                                       | Description          |
+| ------- | ---------------------------------------------------------- | -------------------- |
+| output  | <code>string</code>                                        | The obj as a string. |
+| offsets | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) |                      |
 
 <!-- api-end -->
 

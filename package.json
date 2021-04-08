@@ -1,6 +1,6 @@
 {
   "name": "geom-export-obj",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs) into an OBJ string.",
   "keywords": [
     "geom",

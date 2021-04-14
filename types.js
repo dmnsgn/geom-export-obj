@@ -27,3 +27,5 @@
  * @property {string} output The obj as a string.
  * @property {GeomExportObjOffsets} offsets
  */
+
+export {};

@@ -6,8 +6,8 @@
  * Parse a simplicial complex and return an obj string
  *
  * @see http://paulbourke.net/dataformats/obj/
- * @param {SimplicialComplex} geometry
- * @param {GeomExportObjOffsets} [offsets={ positions: 0, normals: 0, uvs: 0 }}]
+ * @param {import("./types.js").SimplicialComplex} geometry
+ * @param {import("./types.js").GeomExportObjOffsets} [offsets={ positions: 0, normals: 0, uvs: 0 }}]
  * @param {string} [defaultName] A name for the object if geometry.name is not specified.
  * @returns {string}
  */
@@ -67,9 +67,9 @@ function parse(
  * Parse one or more simplicial complex geometry and return an obj string and vertices offsets.
  *
  * @alias module:geomExportObj
- * @param {SimplicialComplex|SimplicialComplex[]} geometries
- * @param {GeomExportObjOptions} [options={}]
- * @returns {GeomExportObjReturnValue}
+ * @param {import("./types.js").SimplicialComplex|import("./types.js").SimplicialComplex[]} geometries
+ * @param {import("./types.js").GeomExportObjOptions} [options={}]
+ * @returns {import("./types.js").GeomExportObjReturnValue}
  */
 function geomExportObj(geometries, options = {}) {
   const {

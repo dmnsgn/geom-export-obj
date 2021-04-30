@@ -34,7 +34,6 @@
         width: 100%;
         columns: 4;
         color: var(--color-light);
-
       }
     </style>
   </head>
@@ -49,7 +48,7 @@
 
       import createRegl from "regl";
       import { mat4 } from "gl-matrix";
-      import { PerspectiveCamera, OrthographicCamera } from "cameras";
+      import { PerspectiveCamera } from "cameras";
 
       // Test geometries
       const boxGeometry = box();
@@ -73,21 +72,10 @@
         planeNoNormalsGeometry,
       ];
 
-      const flattenGeometry = (geometry) => {
-        for (const property in geometry) {
-          if (["positions", "cells", "normals", "uvs"].includes(property)) {
-            geometry[property] = geometry[property].flat();
-          }
-        }
-        return geometry;
-      };
-
       // Generate obj
-      const mainElement = document.querySelector("main")
+      const mainElement = document.querySelector("main");
       const resultElement = document.createElement("code");
-      resultElement.innerText = geomExportObj(
-        geometries.map(flattenGeometry)
-      ).output;
+      resultElement.innerText = geomExportObj(geometries).output;
       mainElement.appendChild(resultElement);
 
       // Camera
@@ -161,8 +149,8 @@
 
           drawGeometry({
             ...geometry,
-            normals: geometry.normals || geometry.positions.map(() => [0, 0, 1]),
-            uvs: geometry.uvs || geometry.positions.map(() => [1, 1]),
+            normals: geometry.normals || geometry.positions,
+            uvs: geometry.uvs || geometry.positions.map(() => 1),
             model,
             projection: perspectiveCamera.projectionMatrix,
             view: perspectiveCamera.viewMatrix,

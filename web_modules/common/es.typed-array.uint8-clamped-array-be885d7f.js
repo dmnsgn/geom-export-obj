@@ -1,4 +1,4 @@
-import { f as fails, U as aFunction, d as toObject, Y as indexedObject, g as toLength, _ as _export, Z as engineIsNode, Q as engineV8Version, ao as typedArrayConstructor } from './es.typed-array.float32-array-fbd9f825.js';
+import { f as fails, U as aFunction, d as toObject, Y as indexedObject, g as toLength, _ as _export, Z as engineIsNode, Q as engineV8Version, ao as typedArrayConstructor } from './es.typed-array.float32-array-5404dd41.js';
 
 var arrayMethodIsStrict = function (METHOD_NAME, argument) {
   var method = [][METHOD_NAME];
@@ -70,14 +70,6 @@ typedArrayConstructor('Float64', function (init) {
   };
 });
 
-// `Int8Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-typedArrayConstructor('Int8', function (init) {
-  return function Int8Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
-
 // `Int16Array` constructor
 // https://tc39.es/ecma262/#sec-typedarray-objects
 typedArrayConstructor('Int16', function (init) {
@@ -94,14 +86,6 @@ typedArrayConstructor('Int32', function (init) {
   };
 });
 
-// `Uint8Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-typedArrayConstructor('Uint8', function (init) {
-  return function Uint8Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
-
 // `Uint8ClampedArray` constructor
 // https://tc39.es/ecma262/#sec-typedarray-objects
 typedArrayConstructor('Uint8', function (init) {
@@ -109,21 +93,5 @@ typedArrayConstructor('Uint8', function (init) {
     return init(this, data, byteOffset, length);
   };
 }, true);
-
-// `Uint16Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-typedArrayConstructor('Uint16', function (init) {
-  return function Uint16Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
-
-// `Uint32Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-typedArrayConstructor('Uint32', function (init) {
-  return function Uint32Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
 
 export { arrayMethodIsStrict as a, arrayReduce as b };

@@ -31,10 +31,10 @@
   "types": "types/index.d.ts",
   "devDependencies": {
     "cameras": "^3.0.1",
-    "core-js": "^3.10.0",
-    "es-module-shims": "^0.10.3",
-    "gl-matrix": "^2.8.1",
-    "primitive-geometry": "^1.2.1",
+    "core-js": "^3.11.1",
+    "es-module-shims": "^0.10.4",
+    "gl-matrix": "^3.3.0",
+    "primitive-geometry": "^2.0.0",
     "regl": "^2.1.0"
   },
   "engines": {

@@ -1,4 +1,4 @@
-import { a as anObject, f as fails, s as shared, _ as _export, w as wellKnownSymbol, r as redefine, c as createNonEnumerableProperty, b as requireObjectCoercible, t as toInteger, d as toObject, e as classofRaw, g as toLength } from './es.typed-array.float32-array-fbd9f825.js';
+import { a as anObject, f as fails, s as shared, _ as _export, w as wellKnownSymbol, r as redefine, c as createNonEnumerableProperty, b as requireObjectCoercible, t as toInteger, d as toObject, e as classofRaw, g as toLength } from './es.typed-array.float32-array-5404dd41.js';
 
 // `RegExp.prototype.flags` getter implementation
 // https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
@@ -40,9 +40,6 @@ var regexpStickyHelpers = {
 };
 
 var nativeExec = RegExp.prototype.exec;
-// This always refers to the native implementation, because the
-// String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
-// which loads this file before patching the method.
 var nativeReplace = shared('native-string-replace', String.prototype.replace);
 
 var patchedExec = nativeExec;
@@ -58,7 +55,7 @@ var UPDATES_LAST_INDEX_WRONG = (function () {
 var UNSUPPORTED_Y$1 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET;
 
 // nonparticipating capturing group, copied from es5-shim's String#split patch.
-// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group -- required for testing
+// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group, regexp/no-lazy-ends -- testing
 var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
 
 var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$1;
@@ -131,7 +128,6 @@ _export({ target: 'RegExp', proto: true, forced: /./.exec !== regexpExec }, {
 });
 
 // TODO: Remove from `core-js@4` since it's moved to entry points
-
 
 
 
@@ -226,7 +222,7 @@ var fixRegexpWellKnownSymbolLogic = function (KEY, length, exec, sham) {
   ) {
     var nativeRegExpMethod = /./[SYMBOL];
     var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
-      if (regexp.exec === regexpExec) {
+      if (regexp.exec === RegExp.prototype.exec) {
         if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
           // The native String method already delegates to @@method (this
           // polyfilled function), leasing to infinite recursion.

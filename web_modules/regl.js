@@ -1,6 +1,7 @@
-import './common/es.typed-array.uint32-array-527a40e6.js';
-import { a3 as createCommonjsModule, ap as commonjsGlobal } from './common/es.typed-array.float32-array-fbd9f825.js';
-import './common/es.string.replace-86964312.js';
+import './common/es.typed-array.uint32-array-00639604.js';
+import './common/es.typed-array.uint8-clamped-array-be885d7f.js';
+import { a3 as createCommonjsModule, ap as commonjsGlobal } from './common/es.typed-array.float32-array-5404dd41.js';
+import './common/es.string.replace-77fbd93f.js';
 
 var regl = createCommonjsModule(function (module, exports) {
   (function (global, factory) {

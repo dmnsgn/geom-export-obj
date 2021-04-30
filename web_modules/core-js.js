@@ -1,6 +1,8 @@
-import { h as toIndexedObject, o as objectGetOwnPropertyNames, w as wellKnownSymbol, p as path, i as has, j as objectDefineProperty, k as sharedKey, l as internalState, m as global_1, n as getBuiltIn, s as shared, q as descriptors, f as fails, u as nativeSymbol, v as uid, r as redefine, _ as _export, x as objectKeys, c as createNonEnumerableProperty, y as setToStringTag, z as arrayIteration, A as objectGetOwnPropertyDescriptor, B as objectCreate, a as anObject, C as toPrimitive, D as createPropertyDescriptor, E as hiddenKeys, F as objectGetOwnPropertySymbols, d as toObject, G as isObject, H as isArray, I as objectPropertyIsEnumerable, J as useSymbolAsUid, K as copyConstructorProperties, L as functionBindContext, M as getIteratorMethod, N as isArrayIteratorMethod, g as toLength, O as objectSetPrototypeOf, P as objectGetPrototypeOf, Q as engineV8Version, R as arraySpeciesCreate, S as toAbsoluteIndex, T as arrayFill, t as toInteger, U as aFunction, V as checkCorrectnessOfIteration, W as arrayIncludes, X as iterators, Y as indexedObject, Z as engineIsNode, $ as setSpecies, a0 as arrayBuffer, a1 as arrayBufferViewCore, a2 as arrayBufferNative, b as requireObjectCoercible, a3 as createCommonjsModule, a4 as isForced_1, a5 as anInstance, a6 as inheritIfRequired, a7 as redefineAll, e as classofRaw, a8 as objectDefineProperties, a9 as ownKeys, aa as correctPrototypeGetter, ab as toStringTagSupport, ac as classof, ad as engineUserAgent, ae as documentCreateElement, af as html, ag as inspectSource, ah as aPossiblePrototype, ai as typedArrayFrom, aj as typedArrayConstructorsRequireWrappers, ak as toOffset, al as nativeWeakMap, am as sharedStore, an as toPositiveInteger } from './common/es.typed-array.float32-array-fbd9f825.js';
-import { a as arrayMethodIsStrict, b as arrayReduce } from './common/es.typed-array.uint32-array-527a40e6.js';
-import { r as regexpStickyHelpers, a as regexpFlags, s as stringMultibyte, f as fixRegexpWellKnownSymbolLogic, b as regexpExecAbstract, c as advanceStringIndex, g as getSubstitution, d as regexpExec } from './common/es.string.replace-86964312.js';
+import { h as toIndexedObject, o as objectGetOwnPropertyNames, w as wellKnownSymbol, p as path, i as has, j as objectDefineProperty, k as sharedKey, l as internalState, m as global_1, n as getBuiltIn, s as shared, q as descriptors, f as fails, u as nativeSymbol, v as uid, r as redefine, _ as _export, x as objectKeys, c as createNonEnumerableProperty, y as setToStringTag, z as arrayIteration, A as objectGetOwnPropertyDescriptor, B as objectCreate, a as anObject, C as toPrimitive, D as createPropertyDescriptor, E as hiddenKeys, F as objectGetOwnPropertySymbols, d as toObject, G as isObject, H as isArray, I as objectPropertyIsEnumerable, J as useSymbolAsUid, K as copyConstructorProperties, L as functionBindContext, M as getIteratorMethod, N as isArrayIteratorMethod, g as toLength, O as objectSetPrototypeOf, P as objectGetPrototypeOf, Q as engineV8Version, R as arraySpeciesCreate, S as toAbsoluteIndex, T as arrayFill, t as toInteger, U as aFunction, V as checkCorrectnessOfIteration, W as arrayIncludes, X as iterators, Y as indexedObject, Z as engineIsNode, $ as setSpecies, a0 as arrayBuffer, a1 as arrayBufferViewCore, a2 as arrayBufferNative, b as requireObjectCoercible, a3 as createCommonjsModule, a4 as isForced_1, a5 as anInstance, a6 as inheritIfRequired, a7 as redefineAll, e as classofRaw, a8 as objectDefineProperties, a9 as ownKeys, aa as correctPrototypeGetter, ab as toStringTagSupport, ac as classof, ad as engineUserAgent, ae as documentCreateElement, af as html, ag as inspectSource, ah as aPossiblePrototype, ai as typedArrayFrom, aj as typedArrayConstructorsRequireWrappers, ak as toOffset, al as nativeWeakMap, am as sharedStore, an as toPositiveInteger } from './common/es.typed-array.float32-array-5404dd41.js';
+import { a as arrayMethodIsStrict, b as arrayReduce } from './common/es.typed-array.uint8-clamped-array-be885d7f.js';
+import { r as regexpStickyHelpers, a as regexpFlags, s as stringMultibyte, f as fixRegexpWellKnownSymbolLogic, b as regexpExecAbstract, c as advanceStringIndex, g as getSubstitution, d as regexpExec } from './common/es.string.replace-77fbd93f.js';
+import './common/es.typed-array.uint32-array-00639604.js';
+import './common/es.typed-array.of-55052825.js';
 
 var isPure = false;
 
@@ -3000,7 +3002,7 @@ _export({ global: true, forced: parseInt != numberParseInt }, {
 
 var nativePromiseConstructor = global_1.Promise;
 
-var engineIsIos = /(iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
+var engineIsIos = /(?:iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
 
 var location = global_1.location;
 var set = global_1.setImmediate;
@@ -3245,11 +3247,11 @@ var PROMISE = 'Promise';
 var getInternalState$2 = internalState.get;
 var setInternalState$3 = internalState.set;
 var getInternalPromiseState = internalState.getterFor(PROMISE);
+var NativePromisePrototype = nativePromiseConstructor && nativePromiseConstructor.prototype;
 var PromiseConstructor = nativePromiseConstructor;
 var TypeError$1 = global_1.TypeError;
 var document$1 = global_1.document;
 var process$2 = global_1.process;
-var $fetch = getBuiltIn('fetch');
 var newPromiseCapability$1 = newPromiseCapability.f;
 var newGenericPromiseCapability = newPromiseCapability$1;
 var DISPATCH_EVENT = !!(document$1 && document$1.createEvent && global_1.dispatchEvent);
@@ -3494,11 +3496,11 @@ if (FORCED$d) {
       : newGenericPromiseCapability(C);
   };
 
-  if ( typeof nativePromiseConstructor == 'function') {
-    nativeThen = nativePromiseConstructor.prototype.then;
+  if ( typeof nativePromiseConstructor == 'function' && NativePromisePrototype !== Object.prototype) {
+    nativeThen = NativePromisePrototype.then;
 
-    // wrap native Promise#then for native async functions
-    redefine(nativePromiseConstructor.prototype, 'then', function then(onFulfilled, onRejected) {
+    // make `Promise#then` return a polyfilled `Promise` for native promise-based APIs
+    redefine(NativePromisePrototype, 'then', function then(onFulfilled, onRejected) {
       var that = this;
       return new PromiseConstructor(function (resolve, reject) {
         nativeThen.call(that, resolve, reject);
@@ -3506,13 +3508,15 @@ if (FORCED$d) {
     // https://github.com/zloirock/core-js/issues/640
     }, { unsafe: true });
 
-    // wrap fetch result
-    if (typeof $fetch == 'function') _export({ global: true, enumerable: true, forced: true }, {
-      // eslint-disable-next-line no-unused-vars -- required for `.length`
-      fetch: function fetch(input /* , init */) {
-        return promiseResolve(PromiseConstructor, $fetch.apply(global_1, arguments));
-      }
-    });
+    // make `.constructor === Promise` work for native promise-based APIs
+    try {
+      delete NativePromisePrototype.constructor;
+    } catch (error) { /* empty */ }
+
+    // make `instanceof Promise` work for native promise-based APIs
+    if (objectSetPrototypeOf) {
+      objectSetPrototypeOf(NativePromisePrototype, PromiseConstructor.prototype);
+    }
   }
 }
 
@@ -3939,7 +3943,7 @@ var getOwnPropertyNames$2 = objectGetOwnPropertyNames.f;
 
 
 
-var setInternalState$4 = internalState.set;
+var enforceInternalState = internalState.enforce;
 
 
 
@@ -3991,7 +3995,10 @@ if (FORCED$f) {
       RegExpWrapper
     );
 
-    if (UNSUPPORTED_Y && sticky) setInternalState$4(result, { sticky: sticky });
+    if (UNSUPPORTED_Y && sticky) {
+      var state = enforceInternalState(result);
+      state.sticky = true;
+    }
 
     return result;
   };
@@ -4210,13 +4217,13 @@ var charAt = stringMultibyte.charAt;
 
 
 var STRING_ITERATOR = 'String Iterator';
-var setInternalState$5 = internalState.set;
+var setInternalState$4 = internalState.set;
 var getInternalState$4 = internalState.getterFor(STRING_ITERATOR);
 
 // `String.prototype[@@iterator]` method
 // https://tc39.es/ecma262/#sec-string.prototype-@@iterator
 defineIterator(String, 'String', function (iterated) {
-  setInternalState$5(this, {
+  setInternalState$4(this, {
     type: STRING_ITERATOR,
     string: String(iterated),
     index: 0
@@ -4292,7 +4299,7 @@ fixRegexpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCal
 var MATCH_ALL = wellKnownSymbol('matchAll');
 var REGEXP_STRING = 'RegExp String';
 var REGEXP_STRING_ITERATOR = REGEXP_STRING + ' Iterator';
-var setInternalState$6 = internalState.set;
+var setInternalState$5 = internalState.set;
 var getInternalState$5 = internalState.getterFor(REGEXP_STRING_ITERATOR);
 var RegExpPrototype$3 = RegExp.prototype;
 var regExpBuiltinExec = RegExpPrototype$3.exec;
@@ -4314,7 +4321,7 @@ var regExpExec = function (R, S) {
 
 // eslint-disable-next-line max-len -- ignore
 var $RegExpStringIterator = createIteratorConstructor(function RegExpStringIterator(regexp, string, global, fullUnicode) {
-  setInternalState$6(this, {
+  setInternalState$5(this, {
     type: REGEXP_STRING_ITERATOR,
     regexp: regexp,
     string: string,
@@ -4385,7 +4392,7 @@ _export({ target: 'String', proto: true, forced: WORKS_WITH_NON_GLOBAL_REGEX }, 
 
 
 // eslint-disable-next-line unicorn/no-unsafe-regex -- safe
-var stringPadWebkitBug = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(engineUserAgent);
+var stringPadWebkitBug = /Version\/10(?:\.\d+){1,2}(?: [\w./]+)?(?: Mobile\/\w+)? Safari\//.test(engineUserAgent);
 
 var $padEnd = stringPad.end;
 
@@ -4516,12 +4523,10 @@ fixRegexpWellKnownSymbolLogic('search', 1, function (SEARCH, nativeSearch, maybe
   ];
 });
 
+var UNSUPPORTED_Y$3 = regexpStickyHelpers.UNSUPPORTED_Y;
 var arrayPush = [].push;
 var min$4 = Math.min;
 var MAX_UINT32 = 0xFFFFFFFF;
-
-// babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
-var SUPPORTS_Y = !fails(function () { return !RegExp(MAX_UINT32, 'y'); });
 
 // @@split logic
 fixRegexpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCallNative) {
@@ -4605,11 +4610,11 @@ fixRegexpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCal
       var flags = (rx.ignoreCase ? 'i' : '') +
                   (rx.multiline ? 'm' : '') +
                   (rx.unicode ? 'u' : '') +
-                  (SUPPORTS_Y ? 'y' : 'g');
+                  (UNSUPPORTED_Y$3 ? 'g' : 'y');
 
       // ^(? + rx + ) is needed, in combination with some S slicing, to
       // simulate the 'y' flag.
-      var splitter = new C(SUPPORTS_Y ? rx : '^(?:' + rx.source + ')', flags);
+      var splitter = new C(UNSUPPORTED_Y$3 ? '^(?:' + rx.source + ')' : rx, flags);
       var lim = limit === undefined ? MAX_UINT32 : limit >>> 0;
       if (lim === 0) return [];
       if (S.length === 0) return regexpExecAbstract(splitter, S) === null ? [S] : [];
@@ -4617,12 +4622,12 @@ fixRegexpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCal
       var q = 0;
       var A = [];
       while (q < S.length) {
-        splitter.lastIndex = SUPPORTS_Y ? q : 0;
-        var z = regexpExecAbstract(splitter, SUPPORTS_Y ? S : S.slice(q));
+        splitter.lastIndex = UNSUPPORTED_Y$3 ? 0 : q;
+        var z = regexpExecAbstract(splitter, UNSUPPORTED_Y$3 ? S.slice(q) : S);
         var e;
         if (
           z === null ||
-          (e = min$4(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
+          (e = min$4(toLength(splitter.lastIndex + (UNSUPPORTED_Y$3 ? q : 0)), S.length)) === p
         ) {
           q = advanceStringIndex(S, q, unicodeMatching);
         } else {
@@ -4639,7 +4644,7 @@ fixRegexpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCal
       return A;
     }
   ];
-}, !SUPPORTS_Y);
+}, UNSUPPORTED_Y$3);
 
 var getOwnPropertyDescriptor$6 = objectGetOwnPropertyDescriptor.f;
 
@@ -5040,19 +5045,6 @@ exportTypedArrayMethod$c('map', function map(mapfn /* , thisArg */) {
   });
 });
 
-var aTypedArrayConstructor$2 = arrayBufferViewCore.aTypedArrayConstructor;
-var exportTypedArrayStaticMethod$1 = arrayBufferViewCore.exportTypedArrayStaticMethod;
-
-// `%TypedArray%.of` method
-// https://tc39.es/ecma262/#sec-%typedarray%.of
-exportTypedArrayStaticMethod$1('of', function of(/* ...items */) {
-  var index = 0;
-  var length = arguments.length;
-  var result = new (aTypedArrayConstructor$2(this))(length);
-  while (length > index) result[index] = arguments[index++];
-  return result;
-}, typedArrayConstructorsRequireWrappers);
-
 var $reduce = arrayReduce.left;
 
 var aTypedArray$d = arrayBufferViewCore.aTypedArray;
@@ -5116,7 +5108,7 @@ exportTypedArrayMethod$g('set', function set(arrayLike /* , offset */) {
 }, FORCED$i);
 
 var aTypedArray$h = arrayBufferViewCore.aTypedArray;
-var aTypedArrayConstructor$3 = arrayBufferViewCore.aTypedArrayConstructor;
+var aTypedArrayConstructor$2 = arrayBufferViewCore.aTypedArrayConstructor;
 var exportTypedArrayMethod$h = arrayBufferViewCore.exportTypedArrayMethod;
 var $slice = [].slice;
 
@@ -5132,7 +5124,7 @@ exportTypedArrayMethod$h('slice', function slice(start, end) {
   var C = speciesConstructor(this, this.constructor);
   var index = 0;
   var length = list.length;
-  var result = new (aTypedArrayConstructor$3(C))(length);
+  var result = new (aTypedArrayConstructor$2(C))(length);
   while (length > index) result[index] = list[index++];
   return result;
 }, FORCED$j);
@@ -5227,7 +5219,7 @@ var getWeakData = internalMetadata.getWeakData;
 
 
 
-var setInternalState$7 = internalState.set;
+var setInternalState$6 = internalState.set;
 var internalStateGetterFor$1 = internalState.getterFor;
 var find = arrayIteration.find;
 var findIndex = arrayIteration.findIndex;
@@ -5274,7 +5266,7 @@ var collectionWeak = {
   getConstructor: function (wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
     var C = wrapper(function (that, iterable) {
       anInstance(that, C, CONSTRUCTOR_NAME);
-      setInternalState$7(that, {
+      setInternalState$6(that, {
         type: CONSTRUCTOR_NAME,
         id: id++,
         frozen: undefined
@@ -5659,7 +5651,7 @@ _export({ global: true, forced: isPure }, {
 
 var Promise$1 = getBuiltIn('Promise');
 
-var setInternalState$8 = internalState.set;
+var setInternalState$7 = internalState.set;
 var getInternalState$6 = internalState.get;
 
 var TO_STRING_TAG$1 = wellKnownSymbol('toStringTag');
@@ -5684,7 +5676,7 @@ var asyncIteratorCreateProxy = function (nextHandler, IS_ITERATOR) {
   var AsyncIteratorProxy = function AsyncIterator(state) {
     state.next = aFunction(state.iterator.next);
     state.done = false;
-    setInternalState$8(this, state);
+    setInternalState$7(this, state);
   };
 
   AsyncIteratorProxy.prototype = redefineAll(objectCreate(path.AsyncIterator.prototype), {
@@ -6163,7 +6155,7 @@ _export({ target: 'AsyncIterator', proto: true, real: true }, {
 var INCORRECT_RANGE = 'Incorrect Number.range arguments';
 var NUMERIC_RANGE_ITERATOR = 'NumericRangeIterator';
 
-var setInternalState$9 = internalState.set;
+var setInternalState$8 = internalState.set;
 var getInternalState$7 = internalState.getterFor(NUMERIC_RANGE_ITERATOR);
 
 var $RangeIterator = createIteratorConstructor(function NumericRangeIterator(start, end, option, type, zero, one) {
@@ -6197,7 +6189,7 @@ var $RangeIterator = createIteratorConstructor(function NumericRangeIterator(sta
   }
   // eslint-disable-next-line no-self-compare -- NaN check
   var hitsEnd = start != start || end != end || step != step || (end > start) !== (step > zero);
-  setInternalState$9(this, {
+  setInternalState$8(this, {
     type: NUMERIC_RANGE_ITERATOR,
     start: start,
     end: end,
@@ -6374,7 +6366,7 @@ _export({ global: true, forced: FORCED$l }, {
   Iterator: IteratorConstructor
 });
 
-var setInternalState$a = internalState.set;
+var setInternalState$9 = internalState.set;
 var getInternalState$8 = internalState.get;
 
 var TO_STRING_TAG$3 = wellKnownSymbol('toStringTag');
@@ -6396,7 +6388,7 @@ var iteratorCreateProxy = function (nextHandler, IS_ITERATOR) {
   var IteratorProxy = function Iterator(state) {
     state.next = aFunction(state.iterator.next);
     state.done = false;
-    setInternalState$a(this, state);
+    setInternalState$9(this, state);
   };
 
   IteratorProxy.prototype = redefineAll(objectCreate(path.Iterator.prototype), {
@@ -7199,12 +7191,12 @@ _export({ target: 'Math', stat: true }, {
 
 var SEEDED_RANDOM = 'Seeded Random';
 var SEEDED_RANDOM_GENERATOR = SEEDED_RANDOM + ' Generator';
-var setInternalState$b = internalState.set;
+var setInternalState$a = internalState.set;
 var getInternalState$9 = internalState.getterFor(SEEDED_RANDOM_GENERATOR);
 var SEED_TYPE_ERROR = 'Math.seededPRNG() argument should have a "seed" field with a finite value.';
 
 var $SeededRandomGenerator = createIteratorConstructor(function SeededRandomGenerator(seed) {
-  setInternalState$b(this, {
+  setInternalState$a(this, {
     type: SEEDED_RANDOM_GENERATOR,
     seed: seed % 2147483647
   });
@@ -7284,13 +7276,19 @@ _export({ target: 'Number', stat: true }, {
   }
 });
 
+// `Object.hasOwn` method
+// https://github.com/tc39/proposal-accessible-object-hasownproperty
+_export({ target: 'Object', stat: true }, {
+  hasOwn: has
+});
+
 var OBJECT_ITERATOR = 'Object Iterator';
-var setInternalState$c = internalState.set;
+var setInternalState$b = internalState.set;
 var getInternalState$a = internalState.getterFor(OBJECT_ITERATOR);
 
 var objectIterator = createIteratorConstructor(function ObjectIterator(source, mode) {
   var object = toObject(source);
-  setInternalState$c(this, {
+  setInternalState$b(this, {
     type: OBJECT_ITERATOR,
     mode: mode,
     object: object,
@@ -7358,7 +7356,7 @@ var defineProperty$a = objectDefineProperty.f;
 
 var OBSERVABLE = wellKnownSymbol('observable');
 var getInternalState$b = internalState.get;
-var setInternalState$d = internalState.set;
+var setInternalState$c = internalState.set;
 
 var getMethod = function (fn) {
   return fn == null ? undefined : aFunction(fn);
@@ -7380,7 +7378,8 @@ var subscriptionClosed = function (subscriptionState) {
   return subscriptionState.observer === undefined;
 };
 
-var close = function (subscription, subscriptionState) {
+var close = function (subscriptionState) {
+  var subscription = subscriptionState.facade;
   if (!descriptors) {
     subscription.closed = true;
     var subscriptionObserver = subscriptionState.subscriptionObserver;
@@ -7389,7 +7388,7 @@ var close = function (subscription, subscriptionState) {
 };
 
 var Subscription = function (observer, subscriber) {
-  var subscriptionState = setInternalState$d(this, {
+  var subscriptionState = setInternalState$c(this, {
     cleanup: undefined,
     observer: anObject(observer),
     subscriptionObserver: undefined
@@ -7419,7 +7418,7 @@ Subscription.prototype = redefineAll({}, {
   unsubscribe: function unsubscribe() {
     var subscriptionState = getInternalState$b(this);
     if (!subscriptionClosed(subscriptionState)) {
-      close(this, subscriptionState);
+      close(subscriptionState);
       cleanupSubscription(subscriptionState);
     }
   }
@@ -7433,7 +7432,7 @@ if (descriptors) defineProperty$a(Subscription.prototype, 'closed', {
 });
 
 var SubscriptionObserver = function (subscription) {
-  setInternalState$d(this, { subscription: subscription });
+  setInternalState$c(this, { subscription: subscription });
   if (!descriptors) this.closed = false;
 };
 
@@ -7451,11 +7450,10 @@ SubscriptionObserver.prototype = redefineAll({}, {
     }
   },
   error: function error(value) {
-    var subscription = getInternalState$b(this).subscription;
-    var subscriptionState = getInternalState$b(subscription);
+    var subscriptionState = getInternalState$b(getInternalState$b(this).subscription);
     if (!subscriptionClosed(subscriptionState)) {
       var observer = subscriptionState.observer;
-      close(subscription, subscriptionState);
+      close(subscriptionState);
       try {
         var errorMethod = getMethod(observer.error);
         if (errorMethod) errorMethod.call(observer, value);
@@ -7466,11 +7464,10 @@ SubscriptionObserver.prototype = redefineAll({}, {
     }
   },
   complete: function complete() {
-    var subscription = getInternalState$b(this).subscription;
-    var subscriptionState = getInternalState$b(subscription);
+    var subscriptionState = getInternalState$b(getInternalState$b(this).subscription);
     if (!subscriptionClosed(subscriptionState)) {
       var observer = subscriptionState.observer;
-      close(subscription, subscriptionState);
+      close(subscriptionState);
       try {
         var completeMethod = getMethod(observer.complete);
         if (completeMethod) completeMethod.call(observer);
@@ -7490,7 +7487,7 @@ if (descriptors) defineProperty$a(SubscriptionObserver.prototype, 'closed', {
 
 var $Observable = function Observable(subscriber) {
   anInstance(this, $Observable, 'Observable');
-  setInternalState$d(this, { subscriber: aFunction(subscriber) });
+  setInternalState$c(this, { subscriber: aFunction(subscriber) });
 };
 
 redefineAll($Observable.prototype, {
@@ -8027,12 +8024,12 @@ _export({ target: 'String', proto: true, forced: FORCED$m }, {
 var codeAt$1 = stringMultibyte.codeAt;
 var charAt$2 = stringMultibyte.charAt;
 var STRING_ITERATOR$1 = 'String Iterator';
-var setInternalState$e = internalState.set;
+var setInternalState$d = internalState.set;
 var getInternalState$c = internalState.getterFor(STRING_ITERATOR$1);
 
 // TODO: unify with String#@@iterator
 var $StringIterator = createIteratorConstructor(function StringIterator(string) {
-  setInternalState$e(this, {
+  setInternalState$d(this, {
     type: STRING_ITERATOR$1,
     string: string,
     index: 0
@@ -8542,12 +8539,12 @@ var stringPunycodeToAscii = function (input) {
 
 
 
-var $fetch$1 = getBuiltIn('fetch');
+var $fetch = getBuiltIn('fetch');
 var Headers = getBuiltIn('Headers');
 var ITERATOR$6 = wellKnownSymbol('iterator');
 var URL_SEARCH_PARAMS = 'URLSearchParams';
 var URL_SEARCH_PARAMS_ITERATOR = URL_SEARCH_PARAMS + 'Iterator';
-var setInternalState$f = internalState.set;
+var setInternalState$e = internalState.set;
 var getInternalParamsState = internalState.getterFor(URL_SEARCH_PARAMS);
 var getInternalIteratorState = internalState.getterFor(URL_SEARCH_PARAMS_ITERATOR);
 
@@ -8626,7 +8623,7 @@ var validateArgumentsLength = function (passed, required) {
 };
 
 var URLSearchParamsIterator = createIteratorConstructor(function Iterator(params, kind) {
-  setInternalState$f(this, {
+  setInternalState$e(this, {
     type: URL_SEARCH_PARAMS_ITERATOR,
     iterator: getIterator(getInternalParamsState(params).entries),
     kind: kind
@@ -8650,7 +8647,7 @@ var URLSearchParamsConstructor = function URLSearchParams(/* init */) {
   var entries = [];
   var iteratorMethod, iterator, next, step, entryIterator, entryNext, first, second, key;
 
-  setInternalState$f(that, {
+  setInternalState$e(that, {
     type: URL_SEARCH_PARAMS,
     entries: entries,
     updateURL: function () { /* empty */ },
@@ -8836,7 +8833,7 @@ _export({ global: true, forced: !nativeUrl }, {
 
 // Wrap `fetch` for correct work with polyfilled `URLSearchParams`
 // https://github.com/zloirock/core-js/issues/674
-if (!nativeUrl && typeof $fetch$1 == 'function' && typeof Headers == 'function') {
+if (!nativeUrl && typeof $fetch == 'function' && typeof Headers == 'function') {
   _export({ global: true, enumerable: true, forced: true }, {
     fetch: function fetch(input /* , init */) {
       var args = [input];
@@ -8857,7 +8854,7 @@ if (!nativeUrl && typeof $fetch$1 == 'function' && typeof Headers == 'function')
           }
         }
         args.push(init);
-      } return $fetch$1.apply(this, args);
+      } return $fetch.apply(this, args);
     }
   });
 }
@@ -8888,7 +8885,7 @@ var codeAt$2 = stringMultibyte.codeAt;
 var NativeURL = global_1.URL;
 var URLSearchParams$1 = web_urlSearchParams.URLSearchParams;
 var getInternalSearchParamsState = web_urlSearchParams.getState;
-var setInternalState$g = internalState.set;
+var setInternalState$f = internalState.set;
 var getInternalURLState = internalState.getterFor('URL');
 var floor$6 = Math.floor;
 var pow$3 = Math.pow;
@@ -8899,6 +8896,7 @@ var INVALID_HOST = 'Invalid host';
 var INVALID_PORT = 'Invalid port';
 
 var ALPHA = /[A-Za-z]/;
+// eslint-disable-next-line regexp/no-obscure-range -- safe
 var ALPHANUMERIC = /[\d+-.A-Za-z]/;
 var DIGIT = /\d/;
 var HEX_START = /^(0x|0X)/;
@@ -8906,10 +8904,10 @@ var OCT = /^[0-7]+$/;
 var DEC = /^\d+$/;
 var HEX = /^[\dA-Fa-f]+$/;
 /* eslint-disable no-control-regex -- safe */
-var FORBIDDEN_HOST_CODE_POINT = /[\u0000\t\u000A\u000D #%/:?@[\\]]/;
-var FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT = /[\u0000\t\u000A\u000D #/:?@[\\]]/;
+var FORBIDDEN_HOST_CODE_POINT = /[\0\t\n\r #%/:?@[\\]]/;
+var FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT = /[\0\t\n\r #/:?@[\\]]/;
 var LEADING_AND_TRAILING_C0_CONTROL_OR_SPACE = /^[\u0000-\u001F ]+|[\u0000-\u001F ]+$/g;
-var TAB_AND_NEW_LINE = /[\t\u000A\u000D]/g;
+var TAB_AND_NEW_LINE = /[\t\n\r]/g;
 /* eslint-enable no-control-regex -- safe */
 var EOF;
 
@@ -9603,7 +9601,7 @@ var URLConstructor = function URL(url /* , base */) {
   var that = anInstance(this, URLConstructor, 'URL');
   var base = arguments.length > 1 ? arguments[1] : undefined;
   var urlString = String(url);
-  var state = setInternalState$g(that, { type: 'URL' });
+  var state = setInternalState$f(that, { type: 'URL' });
   var baseState, failure;
   if (base !== undefined) {
     if (base instanceof URLConstructor) baseState = getInternalURLState(base);
@@ -9668,7 +9666,7 @@ var getOrigin = function () {
   var scheme = url.scheme;
   var port = url.port;
   if (scheme == 'blob') try {
-    return new URL(scheme.path[0]).origin;
+    return new URLConstructor(scheme.path[0]).origin;
   } catch (error) {
     return 'null';
   }

@@ -1,1459 +1,1029 @@
-import { g as glMatrix } from './common/gl-matrix-2eeefb0a.js';
-import './common/vec2-5cf6e4c3.js';
-import './common/es.typed-array.float32-array-fbd9f825.js';
+import './common/es.typed-array.of-55052825.js';
+import './common/es.typed-array.float32-array-5404dd41.js';
+import './common/es.typed-array.uint32-array-00639604.js';
 
-var primitiveQuad_1 = primitiveQuad;
+/**
+ * @module utils
+ */
 
-function primitiveQuad(scale) {
-  scale = typeof scale !== 'undefined' ? scale : 1;
+/**
+ * Two times PI.
+ * @constant {number}
+ */
+const TAU = Math.PI * 2;
+/**
+ * Normalize a vector 3.
+ * @param {number[]} v Vector 3 array
+ * @returns {number[]} Normalized vector
+ */
 
-  if (!Array.isArray(scale)) {
-    scale = [scale, scale];
+function normalize(v) {
+  const l = 1 / (Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) || 1);
+  v[0] *= l;
+  v[1] *= l;
+  v[2] *= l;
+  return v;
+}
+/**
+ * @private
+ */
+
+let TYPED_ARRAY_TYPE;
+/**
+ * Enforce a typed array constructor for cells
+ * @param {(Class<Uint8Array>|Class<Uint16Array>|Class<Uint32Array>)} type
+ */
+
+function setTypedArrayType(type) {
+  TYPED_ARRAY_TYPE = type;
+}
+/**
+ * Select cells typed array from a size determined by amount of vertices.
+ *
+ * @param {number} size The max value expected
+ * @returns {(Uint8Array|Uint16Array|Uint32Array)}
+ * @see [MDN TypedArray objects]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#typedarray_objects}
+ */
+
+const getCellsTypedArray = size => TYPED_ARRAY_TYPE || (size <= 255 ? Uint8Array : size <= 65535 ? Uint16Array : Uint32Array);
+
+var utils = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  TAU: TAU,
+  normalize: normalize,
+  setTypedArrayType: setTypedArrayType,
+  getCellsTypedArray: getCellsTypedArray
+});
+
+/**
+ * @typedef {Object} QuadOptions
+ * @property {number} [scale=0.5]
+ */
+
+/**
+ * @alias module:quad
+ * @param {QuadOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+const quad = ({
+  scale = 0.5
+} = {}) => ({
+  // prettier-ignore
+  positions: Float32Array.of(-scale, -scale, 0, scale, -scale, 0, scale, scale, 0, -scale, scale, 0),
+  // prettier-ignore
+  normals: Int8Array.of(0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1),
+  // prettier-ignore
+  uvs: Uint8Array.of(0, 0, 1, 0, 1, 1, 0, 1),
+  // prettier-ignore
+  cells: getCellsTypedArray(12).of(0, 1, 2, 2, 3, 0)
+});
+
+/**
+ * @typedef {Object} PlaneOptions
+ * @property {number} [sx=1]
+ * @property {number} [sy=sx]
+ * @property {number} [nx=1]
+ * @property {number} [ny=nx]
+ */
+
+/**
+ * @alias module:plane
+ * @param {PlaneOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function plane({
+  sx = 1,
+  sy = sx,
+  nx = 1,
+  ny = nx
+} = {}) {
+  const size = (nx + 1) * (ny + 1);
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))(nx * ny * 6);
+  let vertexIndex = 0;
+  const halfSX = sx * 0.5;
+  const halfSY = sy * 0.5;
+
+  for (let y = 0; y <= ny; y++) {
+    for (let x = 0; x <= nx; x++) {
+      const u = x / nx;
+      const v = y / ny;
+      positions[vertexIndex * 3] = -halfSX + u * sx;
+      positions[vertexIndex * 3 + 1] = halfSY - v * sy;
+      positions[vertexIndex * 3 + 2] = 0;
+      normals[vertexIndex * 3] = 0;
+      normals[vertexIndex * 3 + 1] = 0;
+      normals[vertexIndex * 3 + 2] = 1;
+      uvs[vertexIndex * 2] = u;
+      uvs[vertexIndex * 2 + 1] = 1 - v;
+
+      if (y < ny && x < nx) {
+        const a = y * (nx + 1) + x;
+        const b = (y + 1) * (nx + 1) + x + 1;
+        const c = y * (nx + 1) + x + 1;
+        const d = (y + 1) * (nx + 1) + x;
+        cells[vertexIndex * 6] = a;
+        cells[vertexIndex * 6 + 1] = b;
+        cells[vertexIndex * 6 + 2] = c;
+        cells[vertexIndex * 6 + 3] = b;
+        cells[vertexIndex * 6 + 4] = a;
+        cells[vertexIndex * 6 + 5] = d;
+      }
+
+      vertexIndex++;
+    }
   }
 
-  var positions = [[-scale[0], -scale[1], 0], [scale[0], -scale[1], 0], [scale[0], scale[1], 0], [-scale[0], scale[1], 0]];
-  var cells = [[0, 1, 2], [2, 3, 0]];
-  var uvs = [[0, 0], [1, 0], [1, 1], [0, 1]];
-  var n = [0, 0, -1];
-  var normals = [n.slice(), n.slice(), n.slice(), n.slice()];
   return {
-    positions: positions,
-    cells: cells,
-    uvs: uvs,
-    normals: normals
+    positions,
+    normals,
+    uvs,
+    cells
   };
 }
 
-// 3x3 plane:
-//
-//  0   1   2   3
-//  4   5   6   7
-//  8   9  10  11
-// 12  13  14  15
-function createPlane(sx, sy, nx, ny, options) {
-  sx = sx || 1;
-  sy = sy || sx;
-  nx = nx || 1;
-  ny = ny || nx;
-  var quads = options && options.quads ? options.quads : false;
-  var positions = [];
-  var uvs = [];
-  var normals = [];
-  var cells = [];
+/**
+ * @typedef {Object} CubeOptions
+ * @property {number} [sx=1]
+ * @property {number} [sy=sx]
+ * @property {number} [sz=sx]
+ * @property {number} [nx=1]
+ * @property {number} [ny=nx]
+ * @property {number} [nz=nx]
+ */
 
-  for (var iy = 0; iy <= ny; iy++) {
-    for (var ix = 0; ix <= nx; ix++) {
-      var u = ix / nx;
-      var v = iy / ny;
-      var x = -sx / 2 + u * sx; // starts on the left
+/**
+ * @alias module:cube
+ * @param {CubeOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
 
-      var y = sy / 2 - v * sy; // starts at the top
+function cube({
+  sx = 1,
+  sy = sx,
+  sz = sx,
+  nx = 1,
+  ny = nx,
+  nz = nx
+} = {}) {
+  const size = (nx + 1) * (ny + 1) * 2 + (nx + 1) * (nz + 1) * 2 + (nz + 1) * (ny + 1) * 2;
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))((nx * ny * 2 + nx * nz * 2 + nz * ny * 2) * 6);
+  let vertexIndex = 0;
+  let cellIndex = 0;
 
-      positions.push([x, y, 0]);
-      uvs.push([u, 1.0 - v]);
-      normals.push([0, 0, 1]);
+  function computePlane(u, v, w, su, sv, nu, nv, pw, flipU, flipV) {
+    const vertexOffset = vertexIndex;
 
-      if (iy < ny && ix < nx) {
-        if (quads) {
-          cells.push([iy * (nx + 1) + ix, (iy + 1) * (nx + 1) + ix, (iy + 1) * (nx + 1) + ix + 1, iy * (nx + 1) + ix + 1]);
-        } else {
-          cells.push([iy * (nx + 1) + ix, (iy + 1) * (nx + 1) + ix + 1, iy * (nx + 1) + ix + 1]);
-          cells.push([(iy + 1) * (nx + 1) + ix + 1, iy * (nx + 1) + ix, (iy + 1) * (nx + 1) + ix]);
+    for (let j = 0; j <= nv; j++) {
+      for (let i = 0; i <= nu; i++) {
+        positions[vertexIndex * 3 + u] = (-su / 2 + i * su / nu) * flipU;
+        positions[vertexIndex * 3 + v] = (-sv / 2 + j * sv / nv) * flipV;
+        positions[vertexIndex * 3 + w] = pw;
+        normals[vertexIndex * 3 + u] = 0;
+        normals[vertexIndex * 3 + v] = 0;
+        normals[vertexIndex * 3 + w] = pw / Math.abs(pw);
+        uvs[vertexIndex * 2] = i / nu;
+        uvs[vertexIndex * 2 + 1] = 1 - j / nv;
+        vertexIndex++;
+
+        if (j < nv && i < nu) {
+          const n = vertexOffset + j * (nu + 1) + i;
+          cells[cellIndex] = n;
+          cells[cellIndex + 1] = n + nu + 1;
+          cells[cellIndex + 2] = n + nu + 2;
+          cells[cellIndex + 3] = n;
+          cells[cellIndex + 4] = n + nu + 2;
+          cells[cellIndex + 5] = n + 1;
+          cellIndex += 6;
         }
       }
     }
   }
 
-  return {
-    positions: positions,
-    normals: normals,
-    uvs: uvs,
-    cells: cells
-  };
-}
+  const halfSX = sx * 0.5;
+  const halfSY = sy * 0.5;
+  const halfSZ = sz * 0.5;
+  computePlane(0, 1, 2, sx, sy, nx, ny, halfSZ, 1, -1); // front
 
-var primitivePlane = createPlane;
+  computePlane(0, 1, 2, sx, sy, nx, ny, -halfSZ, -1, -1); // back
 
-function createCube(sx, sy, sz, nx, ny, nz) {
-  if (sx === undefined) sx = 1.0;
-  if (sy === undefined) sy = sx;
-  if (sz === undefined) sz = sx;
-  if (nx === undefined) nx = 1.0;
-  if (ny === undefined) ny = nx;
-  if (nz === undefined) nz = nx;
-  var vertexIndex = 0;
-  var positions = [];
-  var normals = [];
-  var uvs = [];
-  var cells = [];
+  computePlane(2, 1, 0, sz, sy, nz, ny, -halfSX, 1, -1); // left
 
-  function makePlane(u, v, w, su, sv, nu, nv, pw, flipu, flipv) {
-    var vertShift = vertexIndex;
+  computePlane(2, 1, 0, sz, sy, nz, ny, halfSX, -1, -1); // right
 
-    for (var j = 0; j <= nv; j++) {
-      for (var i = 0; i <= nu; i++) {
-        var vert = positions[vertexIndex] = [0, 0, 0];
-        vert[u] = (-su / 2 + i * su / nu) * flipu;
-        vert[v] = (-sv / 2 + j * sv / nv) * flipv;
-        vert[w] = pw;
-        var normal = normals[vertexIndex] = [0, 0, 0];
-        normal[u] = 0;
-        normal[v] = 0;
-        normal[w] = pw / Math.abs(pw);
-        var texCoord = uvs[vertexIndex] = [0, 0];
-        texCoord[0] = i / nu;
-        texCoord[1] = 1.0 - j / nv;
-        ++vertexIndex;
-      }
-    }
+  computePlane(0, 2, 1, sx, sz, nx, nz, halfSY, 1, 1); // top
 
-    for (var j = 0; j < nv; j++) {
-      for (var i = 0; i < nu; i++) {
-        var n = vertShift + j * (nu + 1) + i;
-        cells.push([n, n + nu + 1, n + nu + 2]);
-        cells.push([n, n + nu + 2, n + 1]);
-      }
-    }
-  }
-
-  makePlane(0, 1, 2, sx, sy, nx, ny, sz / 2, 1, -1); //front
-
-  makePlane(0, 1, 2, sx, sy, nx, ny, -sz / 2, -1, -1); //back
-
-  makePlane(2, 1, 0, sz, sy, nz, ny, -sx / 2, 1, -1); //left
-
-  makePlane(2, 1, 0, sz, sy, nz, ny, sx / 2, -1, -1); //right
-
-  makePlane(0, 2, 1, sx, sz, nx, nz, sy / 2, 1, 1); //top
-
-  makePlane(0, 2, 1, sx, sz, nx, nz, -sy / 2, 1, -1); //bottom
+  computePlane(0, 2, 1, sx, sz, nx, nz, -halfSY, 1, -1); // bottom
 
   return {
-    positions: positions,
-    normals: normals,
-    uvs: uvs,
-    cells: cells
-  };
-}
-
-var primitiveCube = createCube;
-
-function create() {
-  return [0, 0, 0];
-}
-
-function equals(a, b) {
-  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
-}
-
-function equals3(a, x, y, z) {
-  return a[0] === x && a[1] === y && a[2] === z;
-}
-
-function set(a, b) {
-  a[0] = b[0];
-  a[1] = b[1];
-  a[2] = b[2];
-  return a;
-}
-
-function set3(a, x, y, z) {
-  a[0] = x;
-  a[1] = y;
-  a[2] = z;
-  return a;
-}
-
-function add(a, b) {
-  a[0] += b[0];
-  a[1] += b[1];
-  a[2] += b[2];
-  return a;
-}
-
-function add3(a, x, y, z) {
-  a[0] += x;
-  a[1] += y;
-  a[2] += z;
-  return a;
-}
-
-function sub(a, b) {
-  a[0] -= b[0];
-  a[1] -= b[1];
-  a[2] -= b[2];
-  return a;
-}
-
-function sub3(a, x, y, z) {
-  a[0] -= x;
-  a[1] -= y;
-  a[2] -= z;
-  return a;
-}
-
-function scale(a, n) {
-  a[0] *= n;
-  a[1] *= n;
-  a[2] *= n;
-  return a;
-}
-
-function multMat4(a, m) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  a[0] = m[0] * x + m[4] * y + m[8] * z + m[12];
-  a[1] = m[1] * x + m[5] * y + m[9] * z + m[13];
-  a[2] = m[2] * x + m[6] * y + m[10] * z + m[14];
-  return a;
-}
-
-function multQuat(a, q) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  var qx = q[0];
-  var qy = q[1];
-  var qz = q[2];
-  var qw = q[3];
-  var ix = qw * x + qy * z - qz * y;
-  var iy = qw * y + qz * x - qx * z;
-  var iz = qw * z + qx * y - qy * x;
-  var iw = -qx * x - qy * y - qz * z;
-  a[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-  a[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-  a[2] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-  return a;
-}
-
-function dot(a, b) {
-  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-}
-
-function cross(a, b) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  var vx = b[0];
-  var vy = b[1];
-  var vz = b[2];
-  a[0] = y * vz - vy * z;
-  a[1] = z * vx - vz * x;
-  a[2] = x * vy - vx * y;
-  return a;
-}
-
-function cross3(a, x, y, z) {
-  var _x = a[0];
-  var _y = a[1];
-  var _z = a[2];
-  a[0] = _y * z - y * _z;
-  a[1] = _z * x - z * _x;
-  a[2] = _x * y - x * _y;
-  return a;
-}
-
-function length(a) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  return Math.sqrt(x * x + y * y + z * z);
-}
-
-function lengthSq(a) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  return x * x + y * y + z * z;
-}
-
-function normalize(a) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  var l = Math.sqrt(x * x + y * y + z * z);
-  l = 1.0 / (l || 1);
-  a[0] *= l;
-  a[1] *= l;
-  a[2] *= l;
-  return a;
-}
-
-function distance(a, b) {
-  return distance3(a, b[0], b[1], b[2]);
-}
-
-function distance3(a, x, y, z) {
-  var dx = x - a[0];
-  var dy = y - a[1];
-  var dz = z - a[2];
-  return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
-
-function distanceSq(a, b) {
-  return distanceSq3(a, b[0], b[1], b[2]);
-}
-
-function distanceSq3(a, x, y, z) {
-  var dx = x - a[0];
-  var dy = y - a[1];
-  var dz = z - a[2];
-  return dx * dx + dy * dy + dz * dz;
-}
-
-function limit(a, n) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  var dsq = x * x + y * y + z * z;
-  var lsq = n * n;
-
-  if (lsq > 0 && dsq > lsq) {
-    var nd = n / Math.sqrt(dsq);
-    a[0] *= nd;
-    a[1] *= nd;
-    a[2] *= nd;
-  }
-
-  return a;
-}
-
-function invert(a) {
-  a[0] *= -1;
-  a[1] *= -1;
-  a[2] *= -1;
-  return a;
-}
-
-function lerp(a, b, n) {
-  var x = a[0];
-  var y = a[1];
-  var z = a[2];
-  a[0] = x + (b[0] - x) * n;
-  a[1] = y + (b[1] - y) * n;
-  a[2] = z + (b[2] - z) * n;
-  return a;
-}
-
-function toZero(a) {
-  a[0] = a[1] = a[2] = 0;
-  return a;
-}
-
-function toOne(a) {
-  a[0] = a[1] = a[2] = 1;
-  return a;
-}
-
-function toMax(a) {
-  a[0] = a[1] = a[2] = Number.MAX_VALUE;
-  return a;
-}
-
-function toMin(a) {
-  a[0] = a[1] = a[2] = -Number.MAX_VALUE;
-  return a;
-}
-
-function toAbs(a) {
-  a[0] = Math.abs(a[0]);
-  a[1] = Math.abs(a[1]);
-  a[2] = Math.abs(a[2]);
-  return a;
-}
-
-function xAxis() {
-  return [1, 0, 0];
-}
-
-function yAxis() {
-  return [0, 1, 0];
-}
-
-function zAxis() {
-  return [0, 0, 1];
-}
-
-function toString(a, precision) {
-  precision = precision || Math.pow(10, 4);
-  var s = '[';
-  s += Math.floor(a[0] * precision) / precision + ', ';
-  s += Math.floor(a[1] * precision) / precision + ', ';
-  s += Math.floor(a[2] * precision) / precision + ']';
-  return s;
-}
-
-function copy(a, out) {
-  if (out !== undefined) {
-    out[0] = a[0];
-    out[1] = a[1];
-    out[2] = a[2];
-    return out;
-  }
-
-  return a.slice(0);
-}
-
-var Vec3 = {
-  create: create,
-  set: set,
-  set3: set3,
-  copy: copy,
-  equals: equals,
-  equals3: equals3,
-  add: add,
-  add3: add3,
-  sub: sub,
-  sub3: sub3,
-  scale: scale,
-  multMat4: multMat4,
-  multQuat: multQuat,
-  dot: dot,
-  cross: cross,
-  cross3: cross3,
-  length: length,
-  lengthSq: lengthSq,
-  normalize: normalize,
-  distance: distance,
-  distance3: distance3,
-  distanceSq: distanceSq,
-  distanceSq3: distanceSq3,
-  limit: limit,
-  invert: invert,
-  lerp: lerp,
-  toZero: toZero,
-  toOne: toOne,
-  toMin: toMin,
-  toMax: toMax,
-  toAbs: toAbs,
-  xAxis: xAxis,
-  yAxis: yAxis,
-  zAxis: zAxis,
-  toString: toString
-};
-var Vec3_1 = Vec3;
-
-function createRoundedCube(sx, sy, sz, nx, ny, nz, radius) {
-  if (sx === undefined) sx = 1.0;
-  if (sy === undefined) sy = sx;
-  if (sz === undefined) sz = sx;
-  if (nx === undefined) nx = 1.0;
-  if (ny === undefined) ny = nx;
-  if (nz === undefined) nz = nx;
-  if (radius == undefined) radius = 0;
-  var rx = sx / 2.0;
-  var ry = sy / 2.0;
-  var rz = sz / 2.0;
-  var cube = primitiveCube(sx, sy, sz, nx, ny, nz);
-  var positions = cube.positions;
-  var normals = cube.normals;
-  var tmp = [0, 0, 0];
-
-  for (var i = 0; i < positions.length; i++) {
-    var pos = positions[i];
-    var normal = normals[i];
-    var inner = Vec3_1.copy(pos);
-
-    if (pos[0] < -rx + radius) {
-      inner[0] = -rx + radius;
-    } else if (pos[0] > rx - radius) {
-      inner[0] = rx - radius;
-    }
-
-    if (pos[1] < -ry + radius) {
-      inner[1] = -ry + radius;
-    } else if (pos[1] > ry - radius) {
-      inner[1] = ry - radius;
-    }
-
-    if (pos[2] < -rz + radius) {
-      inner[2] = -rz + radius;
-    } else if (pos[2] > rz - radius) {
-      inner[2] = rz - radius;
-    }
-
-    Vec3_1.set(normal, pos);
-    Vec3_1.sub(normal, inner);
-    Vec3_1.normalize(normal);
-    Vec3_1.set(pos, inner);
-    Vec3_1.set(tmp, normal);
-    Vec3_1.scale(tmp, radius);
-    Vec3_1.add(pos, tmp);
-  }
-
-  return cube;
-}
-
-var primitiveRoundedCube = createRoundedCube;
-
-function createCapsule(radius, height, numSubdivisionsHeight, numSegments) {
-  if (radius === undefined) radius = 0.5;
-  if (height === undefined) height = radius * 2;
-  if (numSubdivisionsHeight === undefined) numSubdivisionsHeight = 12;
-  if (numSegments === undefined) numSegments = 12;
-  var positions = [];
-  var normals = [];
-  var uvs = [];
-  var cells = [];
-
-  function calculateRing(segments, r, y, dy) {
-    var segIncr = 1.0 / (segments - 1);
-
-    for (var s = 0; s < segments; s++) {
-      var x = -Math.cos(Math.PI * 2 * s * segIncr) * r;
-      var z = Math.sin(Math.PI * 2 * s * segIncr) * r;
-      positions.push([radius * x, radius * y + height * dy, radius * z]);
-      normals.push([x, y, z]);
-      var u = s * segIncr;
-      var v = 0.5 - (radius * y + height * dy) / (2.0 * radius + height);
-      uvs.push([u, 1.0 - v]);
-    }
-  }
-
-  var ringsBody = numSubdivisionsHeight + 1;
-  var ringsTotal = numSubdivisionsHeight + ringsBody;
-  var bodyIncr = 1.0 / (ringsBody - 1);
-  var ringIncr = 1.0 / (numSubdivisionsHeight - 1);
-
-  for (var r = 0; r < numSubdivisionsHeight / 2; r++) {
-    calculateRing(numSegments, Math.sin(Math.PI * r * ringIncr), Math.sin(Math.PI * (r * ringIncr - 0.5)), -0.5);
-  }
-
-  for (var r = 0; r < ringsBody; r++) {
-    calculateRing(numSegments, 1.0, 0.0, r * bodyIncr - 0.5);
-  }
-
-  for (var r = numSubdivisionsHeight / 2; r < numSubdivisionsHeight; r++) {
-    calculateRing(numSegments, Math.sin(Math.PI * r * ringIncr), Math.sin(Math.PI * (r * ringIncr - 0.5)), +0.5);
-  }
-
-  for (var r = 0; r < ringsTotal - 1; r++) {
-    for (var s = 0; s < numSegments - 1; s++) {
-      cells.push([r * numSegments + (s + 0), r * numSegments + (s + 1), (r + 1) * numSegments + (s + 1)]);
-      cells.push([r * numSegments + s, (r + 1) * numSegments + (s + 1), (r + 1) * numSegments + (s + 0)]);
-    }
-  }
-
-  return {
-    positions: positions,
-    normals: normals,
-    uvs: uvs,
-    cells: cells
-  };
-}
-
-var primitiveCapsule = createCapsule;
-
-var identity_1 = identity;
-/**
- * Set a mat4 to the identity matrix
- *
- * @param {mat4} out the receiving matrix
- * @returns {mat4} out
- */
-
-function identity(out) {
-  out[0] = 1;
-  out[1] = 0;
-  out[2] = 0;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = 1;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = 0;
-  out[9] = 0;
-  out[10] = 1;
-  out[11] = 0;
-  out[12] = 0;
-  out[13] = 0;
-  out[14] = 0;
-  out[15] = 1;
-  return out;
-}
-
-var rotateY_1 = rotateY;
-/**
- * Rotates a matrix by the given angle around the Y axis
- *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the matrix to rotate
- * @param {Number} rad the angle to rotate the matrix by
- * @returns {mat4} out
- */
-
-function rotateY(out, a, rad) {
-  var s = Math.sin(rad),
-      c = Math.cos(rad),
-      a00 = a[0],
-      a01 = a[1],
-      a02 = a[2],
-      a03 = a[3],
-      a20 = a[8],
-      a21 = a[9],
-      a22 = a[10],
-      a23 = a[11];
-
-  if (a !== out) {
-    // If the source and destination differ, copy the unchanged rows
-    out[4] = a[4];
-    out[5] = a[5];
-    out[6] = a[6];
-    out[7] = a[7];
-    out[12] = a[12];
-    out[13] = a[13];
-    out[14] = a[14];
-    out[15] = a[15];
-  } // Perform axis-specific matrix multiplication
-
-
-  out[0] = a00 * c - a20 * s;
-  out[1] = a01 * c - a21 * s;
-  out[2] = a02 * c - a22 * s;
-  out[3] = a03 * c - a23 * s;
-  out[8] = a00 * s + a20 * c;
-  out[9] = a01 * s + a21 * c;
-  out[10] = a02 * s + a22 * c;
-  out[11] = a03 * s + a23 * c;
-  return out;
-}
-
-var rotateZ_1 = rotateZ;
-/**
- * Rotates a matrix by the given angle around the Z axis
- *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the matrix to rotate
- * @param {Number} rad the angle to rotate the matrix by
- * @returns {mat4} out
- */
-
-function rotateZ(out, a, rad) {
-  var s = Math.sin(rad),
-      c = Math.cos(rad),
-      a00 = a[0],
-      a01 = a[1],
-      a02 = a[2],
-      a03 = a[3],
-      a10 = a[4],
-      a11 = a[5],
-      a12 = a[6],
-      a13 = a[7];
-
-  if (a !== out) {
-    // If the source and destination differ, copy the unchanged last row
-    out[8] = a[8];
-    out[9] = a[9];
-    out[10] = a[10];
-    out[11] = a[11];
-    out[12] = a[12];
-    out[13] = a[13];
-    out[14] = a[14];
-    out[15] = a[15];
-  } // Perform axis-specific matrix multiplication
-
-
-  out[0] = a00 * c + a10 * s;
-  out[1] = a01 * c + a11 * s;
-  out[2] = a02 * c + a12 * s;
-  out[3] = a03 * c + a13 * s;
-  out[4] = a10 * c - a00 * s;
-  out[5] = a11 * c - a01 * s;
-  out[6] = a12 * c - a02 * s;
-  out[7] = a13 * c - a03 * s;
-  return out;
-}
-
-var scale_1 = scale$1;
-/**
- * Scales a vec3 by a scalar number
- *
- * @param {vec3} out the receiving vector
- * @param {vec3} a the vector to scale
- * @param {Number} b amount to scale the vector by
- * @returns {vec3} out
- */
-
-function scale$1(out, a, b) {
-  out[0] = a[0] * b;
-  out[1] = a[1] * b;
-  out[2] = a[2] * b;
-  return out;
-}
-
-var transformMat4_1 = transformMat4;
-/**
- * Transforms the vec3 with a mat4.
- * 4th vector component is implicitly '1'
- *
- * @param {vec3} out the receiving vector
- * @param {vec3} a the vector to transform
- * @param {mat4} m matrix to transform with
- * @returns {vec3} out
- */
-
-function transformMat4(out, a, m) {
-  var x = a[0],
-      y = a[1],
-      z = a[2],
-      w = m[3] * x + m[7] * y + m[11] * z + m[15];
-  w = w || 1.0;
-  out[0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) / w;
-  out[1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) / w;
-  out[2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) / w;
-  return out;
-}
-
-var normalize_1 = normalize$1;
-/**
- * Normalize a vec3
- *
- * @param {vec3} out the receiving vector
- * @param {vec3} a vector to normalize
- * @returns {vec3} out
- */
-
-function normalize$1(out, a) {
-  var x = a[0],
-      y = a[1],
-      z = a[2];
-  var len = x * x + y * y + z * z;
-
-  if (len > 0) {
-    //TODO: evaluate use of glm_invsqrt here?
-    len = 1 / Math.sqrt(len);
-    out[0] = a[0] * len;
-    out[1] = a[1] * len;
-    out[2] = a[2] * len;
-  }
-
-  return out;
-}
-
-var matRotY = identity_1([]);
-var matRotZ = identity_1([]);
-var up = [0, 1, 0];
-var tmpVec3 = [0, 0, 0];
-var primitiveSphere_1 = primitiveSphere;
-
-function primitiveSphere(radius, opt) {
-  opt = opt || {};
-  radius = typeof radius !== 'undefined' ? radius : 1;
-  var segments = typeof opt.segments !== 'undefined' ? opt.segments : 32;
-  var totalZRotationSteps = 2 + segments;
-  var totalYRotationSteps = 2 * totalZRotationSteps;
-  var indices = [];
-  var positions = [];
-  var normals = [];
-  var uvs = [];
-
-  for (var zRotationStep = 0; zRotationStep <= totalZRotationSteps; zRotationStep++) {
-    var normalizedZ = zRotationStep / totalZRotationSteps;
-    var angleZ = normalizedZ * Math.PI;
-
-    for (var yRotationStep = 0; yRotationStep <= totalYRotationSteps; yRotationStep++) {
-      var normalizedY = yRotationStep / totalYRotationSteps;
-      var angleY = normalizedY * Math.PI * 2;
-      identity_1(matRotZ);
-      rotateZ_1(matRotZ, matRotZ, -angleZ);
-      identity_1(matRotY);
-      rotateY_1(matRotY, matRotY, angleY);
-      transformMat4_1(tmpVec3, up, matRotZ);
-      transformMat4_1(tmpVec3, tmpVec3, matRotY);
-      scale_1(tmpVec3, tmpVec3, -radius);
-      positions.push(tmpVec3.slice());
-      normalize_1(tmpVec3, tmpVec3);
-      normals.push(tmpVec3.slice());
-      uvs.push([normalizedY, normalizedZ]);
-    }
-
-    if (zRotationStep > 0) {
-      var verticesCount = positions.length;
-      var firstIndex = verticesCount - 2 * (totalYRotationSteps + 1);
-
-      for (; firstIndex + totalYRotationSteps + 2 < verticesCount; firstIndex++) {
-        indices.push([firstIndex, firstIndex + 1, firstIndex + totalYRotationSteps + 1]);
-        indices.push([firstIndex + totalYRotationSteps + 1, firstIndex + 1, firstIndex + totalYRotationSteps + 2]);
-      }
-    }
-  }
-
-  return {
-    cells: indices,
-    positions: positions,
-    normals: normals,
-    uvs: uvs
-  };
-}
-
-var normalizeNd = normalize$2;
-
-function normalize$2(vec) {
-  var mag = 0;
-
-  for (var n = 0; n < vec.length; n++) {
-    mag += vec[n] * vec[n];
-  }
-
-  mag = Math.sqrt(mag); // avoid dividing by zero
-
-  if (mag === 0) {
-    return Array.apply(null, new Array(vec.length)).map(Number.prototype.valueOf, 0);
-  }
-
-  for (var n = 0; n < vec.length; n++) {
-    vec[n] /= mag;
-  }
-
-  return vec;
-}
-
-var icosphere_1 = icosphere;
-
-function icosphere(subdivisions) {
-  subdivisions = +subdivisions | 0;
-  var positions = [];
-  var faces = [];
-  var t = 0.5 + Math.sqrt(5) / 2;
-  positions.push([-1, +t, 0]);
-  positions.push([+1, +t, 0]);
-  positions.push([-1, -t, 0]);
-  positions.push([+1, -t, 0]);
-  positions.push([0, -1, +t]);
-  positions.push([0, +1, +t]);
-  positions.push([0, -1, -t]);
-  positions.push([0, +1, -t]);
-  positions.push([+t, 0, -1]);
-  positions.push([+t, 0, +1]);
-  positions.push([-t, 0, -1]);
-  positions.push([-t, 0, +1]);
-  faces.push([0, 11, 5]);
-  faces.push([0, 5, 1]);
-  faces.push([0, 1, 7]);
-  faces.push([0, 7, 10]);
-  faces.push([0, 10, 11]);
-  faces.push([1, 5, 9]);
-  faces.push([5, 11, 4]);
-  faces.push([11, 10, 2]);
-  faces.push([10, 7, 6]);
-  faces.push([7, 1, 8]);
-  faces.push([3, 9, 4]);
-  faces.push([3, 4, 2]);
-  faces.push([3, 2, 6]);
-  faces.push([3, 6, 8]);
-  faces.push([3, 8, 9]);
-  faces.push([4, 9, 5]);
-  faces.push([2, 4, 11]);
-  faces.push([6, 2, 10]);
-  faces.push([8, 6, 7]);
-  faces.push([9, 8, 1]);
-  var complex = {
-    cells: faces,
-    positions: positions
-  };
-
-  while (subdivisions-- > 0) {
-    complex = subdivide(complex);
-  }
-
-  positions = complex.positions;
-
-  for (var i = 0; i < positions.length; i++) {
-    normalizeNd(positions[i]);
-  }
-
-  return complex;
-} // TODO: work out the second half of loop subdivision
-// and extract this into its own module.
-
-
-function subdivide(complex) {
-  var positions = complex.positions;
-  var cells = complex.cells;
-  var newCells = [];
-  var newPositions = [];
-  var midpoints = {};
-  var l = 0;
-
-  for (var i = 0; i < cells.length; i++) {
-    var cell = cells[i];
-    var c0 = cell[0];
-    var c1 = cell[1];
-    var c2 = cell[2];
-    var v0 = positions[c0];
-    var v1 = positions[c1];
-    var v2 = positions[c2];
-    var a = getMidpoint(v0, v1);
-    var b = getMidpoint(v1, v2);
-    var c = getMidpoint(v2, v0);
-    var ai = newPositions.indexOf(a);
-    if (ai === -1) ai = l++, newPositions.push(a);
-    var bi = newPositions.indexOf(b);
-    if (bi === -1) bi = l++, newPositions.push(b);
-    var ci = newPositions.indexOf(c);
-    if (ci === -1) ci = l++, newPositions.push(c);
-    var v0i = newPositions.indexOf(v0);
-    if (v0i === -1) v0i = l++, newPositions.push(v0);
-    var v1i = newPositions.indexOf(v1);
-    if (v1i === -1) v1i = l++, newPositions.push(v1);
-    var v2i = newPositions.indexOf(v2);
-    if (v2i === -1) v2i = l++, newPositions.push(v2);
-    newCells.push([v0i, ai, ci]);
-    newCells.push([v1i, bi, ai]);
-    newCells.push([v2i, ci, bi]);
-    newCells.push([ai, bi, ci]);
-  }
-
-  return {
-    cells: newCells,
-    positions: newPositions
-  }; // reuse midpoint vertices between iterations.
-  // Otherwise, there'll be duplicate vertices in the final
-  // mesh, resulting in sharp edges.
-
-  function getMidpoint(a, b) {
-    var point = midpoint(a, b);
-    var pointKey = pointToKey(point);
-    var cachedPoint = midpoints[pointKey];
-
-    if (cachedPoint) {
-      return cachedPoint;
-    } else {
-      return midpoints[pointKey] = point;
-    }
-  }
-
-  function pointToKey(point) {
-    return point[0].toPrecision(6) + ',' + point[1].toPrecision(6) + ',' + point[2].toPrecision(6);
-  }
-
-  function midpoint(a, b) {
-    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
-  }
-}
-
-var cross_1 = cross$1;
-/**
- * Computes the cross product of two vec2's
- * Note that the cross product must by definition produce a 3D vector
- *
- * @param {vec3} out the receiving vector
- * @param {vec2} a the first operand
- * @param {vec2} b the second operand
- * @returns {vec3} out
- */
-
-function cross$1(out, a, b) {
-  var z = a[0] * b[1] - a[1] * b[0];
-  out[0] = out[1] = 0;
-  out[2] = z;
-  return out;
-}
-
-var subtract_1 = subtract;
-/**
- * Subtracts vector b from vector a
- *
- * @param {vec2} out the receiving vector
- * @param {vec2} a the first operand
- * @param {vec2} b the second operand
- * @returns {vec2} out
- */
-
-function subtract(out, a, b) {
-  out[0] = a[0] - b[0];
-  out[1] = a[1] - b[1];
-  return out;
-}
-
-var tmpX = [0, 0, 0];
-var tmpY = [0, 0, 0];
-
-var isUvSeam = function isUVBroken(uvs, a, b, c) {
-  var uvA = uvs[a];
-  var uvB = uvs[b];
-  var uvC = uvs[c];
-  subtract_1(tmpX, uvB, uvA);
-  subtract_1(tmpY, uvC, uvA);
-  cross_1(tmpX, tmpX, tmpY);
-  return tmpX[2] < 0;
-};
-
-var MIN = 0.25;
-var MAX = 0.75;
-var fixWrappedUvs = fixWrappedUVs;
-
-function fixWrappedUVs(mesh) {
-  var positions = mesh.positions;
-  var cells = mesh.cells;
-  var uvs = mesh.uvs;
-  var newVertices = positions.slice();
-  var newUvs = uvs.slice();
-  var visited = {};
-
-  for (var i = 0; i < cells.length; i++) {
-    var cell = cells[i];
-    var a = cell[0];
-    var b = cell[1];
-    var c = cell[2];
-
-    if (!isUvSeam(uvs, a, b, c)) {
-      continue;
-    }
-
-    var p0 = positions[a];
-    var p1 = positions[b];
-    var p2 = positions[c];
-    var uv0 = uvs[a];
-    var uv1 = uvs[b];
-    var uv2 = uvs[c];
-
-    if (uv0[0] < MIN) {
-      a = revisit(visited, a, uv0, p0);
-    }
-
-    if (uv1[0] < MIN) {
-      b = revisit(visited, b, uv1, p1);
-    }
-
-    if (uv2[0] < MIN) {
-      c = revisit(visited, c, uv2, p2);
-    }
-
-    cell[0] = a;
-    cell[1] = b;
-    cell[2] = c;
-  }
-
-  fixUVEdges(cells, newUvs); // modify mesh in place with new lists
-
-  mesh.positions = newVertices;
-  mesh.uvs = newUvs;
-
-  function revisit(cache, face, uv, position) {
-    if (!(face in cache)) {
-      newVertices.push(position.slice());
-      newUvs.push(uv.slice());
-      var verticeIndex = newVertices.length - 1;
-      cache[face] = verticeIndex;
-      return verticeIndex;
-    } else {
-      return cache[face];
-    }
-  }
-}
-
-function fixUVEdges(cells, uvs) {
-  for (var i = 0; i < cells.length; i++) {
-    var cell = cells[i];
-    var uv0 = uvs[cell[0]];
-    var uv1 = uvs[cell[1]];
-    var uv2 = uvs[cell[2]];
-    var max = Math.max(uv0[0], uv1[0], uv2[0]);
-    var min = Math.min(uv0[0], uv1[0], uv2[0]);
-
-    if (max > MAX && min < MIN) {
-      if (uv0[0] < MIN) uv0[0] += 1;
-      if (uv1[0] < MIN) uv1[0] += 1;
-      if (uv2[0] < MIN) uv2[0] += 1;
-    }
-  }
-}
-
-var fixPoleUvs = fixPoleUVs;
-
-function fixPoleUVs(mesh) {
-  var positions = mesh.positions;
-  var cells = mesh.cells;
-  var uvs = mesh.uvs;
-  var northIndex = firstYIndex(positions, 1);
-  var southIndex = firstYIndex(positions, -1);
-
-  if (northIndex === -1 || southIndex === -1) {
-    // could not find any poles, bail early
-    return;
-  }
-
-  var newVertices = positions.slice();
-  var newUvs = uvs.slice();
-  var verticeIndex = newVertices.length - 1;
-
-  for (var i = 0; i < cells.length; i++) {
-    var cell = cells[i];
-    var a = cell[0];
-    var b = cell[1];
-    var c = cell[2];
-
-    if (a === northIndex) {
-      visit(cell, northIndex, b, c);
-    } else if (a === southIndex) {
-      visit(cell, southIndex, b, c);
-    }
-  }
-
-  mesh.positions = newVertices;
-  mesh.uvs = newUvs;
-
-  function visit(cell, poleIndex, b, c) {
-    var uv1 = uvs[b];
-    var uv2 = uvs[c];
-    uvs[poleIndex][0] = (uv1[0] + uv2[0]) / 2;
-    verticeIndex++;
-    newVertices.push(positions[poleIndex].slice());
-    newUvs.push(uvs[poleIndex].slice());
-    cell[0] = verticeIndex;
-  }
-}
-
-function firstYIndex(list, value) {
-  for (var i = 0; i < list.length; i++) {
-    var vec = list[i];
-
-    if (Math.abs(vec[1] - value) <= 1e-4) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
-var primitiveIcosphere = function primitiveIcosphere(radius, opt) {
-  opt = opt || {};
-  radius = typeof radius !== 'undefined' ? radius : 1;
-  var subdivisions = typeof opt.subdivisions !== 'undefined' ? opt.subdivisions : 2;
-  var complex = icosphere_1(subdivisions);
-  var normals = [];
-  var uvs = [];
-  var i, position;
-
-  for (i = 0; i < complex.positions.length; i++) {
-    position = complex.positions[i]; // get UV from unit icosphere
-
-    var u = 0.5 * (-(Math.atan2(position[2], -position[0]) / Math.PI) + 1.0);
-    var v = 0.5 + Math.asin(position[1]) / Math.PI;
-    uvs.push([1 - u, 1 - v]);
-  }
-
-  var mesh = {
-    positions: complex.positions,
-    cells: complex.cells,
-    uvs: uvs,
-    normals: normals
-  }; // attempt to fix some of the glaring seam issues
-
-  fixPoleUvs(mesh);
-  fixWrappedUvs(mesh); // now determine normals
-
-  for (i = 0; i < mesh.positions.length; i++) {
-    position = mesh.positions[i]; // get normal
-
-    var normal = normalize_1([0, 0, 0], position);
-    normals.push(normal); // and scale sphere to radius
-
-    scale_1(position, position, radius);
-  }
-
-  return mesh;
-};
-
-const {
-  vec3
-} = glMatrix;
-const tmp = [0, 0, 0];
-
-function createEllipsoid(radius = 1, options) {
-  // Default to an oblate spheroid
-  const {
-    latSegments = 32,
-    lngSegments = 64,
-    rx = 2,
-    ry = 1,
-    rz = 1
-  } = { ...options
-  };
-  const cells = [];
-  const positions = [];
-  const normals = [];
-  const uvs = [];
-
-  for (let latSteps = 0; latSteps <= latSegments; latSteps++) {
-    const normalizedZ = latSteps / latSegments;
-    const theta = normalizedZ * Math.PI;
-    const sinTheta = Math.sin(theta);
-    const cosTheta = Math.cos(theta);
-
-    for (let lngSteps = 0; lngSteps <= lngSegments; lngSteps++) {
-      const normalizedY = lngSteps / lngSegments;
-      const phi = normalizedY * Math.PI * 2;
-      const sinPhi = Math.sin(phi);
-      const cosPhi = Math.cos(phi);
-      const x = rx * cosPhi * sinTheta;
-      const y = ry * cosTheta;
-      const z = -rz * sinPhi * sinTheta;
-      vec3.set(tmp, x, y, z);
-      vec3.scale(tmp, tmp, -radius);
-      positions.push([...tmp]);
-      vec3.normalize(tmp, tmp);
-      normals.push([...tmp]);
-      uvs.push([normalizedY, normalizedZ]);
-    }
-
-    if (latSteps > 0) {
-      const verticesCount = positions.length;
-
-      for (let firstIndex = verticesCount - 2 * (lngSegments + 1); firstIndex + lngSegments + 2 < verticesCount; firstIndex++) {
-        cells.push([firstIndex + 0, firstIndex + 1, firstIndex + lngSegments + 1]);
-        cells.push([firstIndex + lngSegments + 1, firstIndex + 1, firstIndex + lngSegments + 2]);
-      }
-    }
-  }
-
-  return {
-    cells,
     positions,
     normals,
-    uvs
+    uvs,
+    cells
   };
 }
 
-var primitiveEllipsoid = createEllipsoid;
-
-var defined = function () {
-  for (var i = 0; i < arguments.length; i++) {
-    if (arguments[i] !== undefined) return arguments[i];
-  }
-};
-
-var subtract_1$1 = subtract$1;
 /**
- * Subtracts vector b from vector a
- *
- * @param {vec3} out the receiving vector
- * @param {vec3} a the first operand
- * @param {vec3} b the second operand
- * @returns {vec3} out
+ * @module rounded-cube
+ */
+const TMP = [0, 0, 0];
+/**
+ * @typedef {Object} RoundedCubeOptions
+ * @property {number} [sx=1]
+ * @property {number} [sy=sx]
+ * @property {number} [sz=sx]
+ * @property {number} [nx=16]
+ * @property {number} [ny=nx]
+ * @property {number} [nz=nx]
+ * @property {number} [radius=sx * 0.25]
  */
 
-function subtract$1(out, a, b) {
-  out[0] = a[0] - b[0];
-  out[1] = a[1] - b[1];
-  out[2] = a[2] - b[2];
-  return out;
+/**
+ * @alias module:rounded-cube
+ * @param {RoundedCubeOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function roundedCube({
+  sx = 1,
+  sy = sx,
+  sz = sx,
+  nx = 16,
+  ny = nx,
+  nz = nx,
+  radius = sx * 0.25
+} = {}) {
+  const geometry = cube({
+    sx,
+    sy,
+    sz,
+    nx,
+    ny,
+    nz
+  });
+  const rx = sx * 0.5;
+  const ry = sy * 0.5;
+  const rz = sz * 0.5;
+
+  for (let i = 0; i < geometry.positions.length; i += 3) {
+    const position = [geometry.positions[i], geometry.positions[i + 1], geometry.positions[i + 2]];
+    TMP[0] = position[0];
+    TMP[1] = position[1];
+    TMP[2] = position[2];
+
+    if (position[0] < -rx + radius) {
+      position[0] = -rx + radius;
+    } else if (position[0] > rx - radius) {
+      position[0] = rx - radius;
+    }
+
+    if (position[1] < -ry + radius) {
+      position[1] = -ry + radius;
+    } else if (position[1] > ry - radius) {
+      position[1] = ry - radius;
+    }
+
+    if (position[2] < -rz + radius) {
+      position[2] = -rz + radius;
+    } else if (position[2] > rz - radius) {
+      position[2] = rz - radius;
+    }
+
+    TMP[0] -= position[0];
+    TMP[1] -= position[1];
+    TMP[2] -= position[2];
+    normalize(TMP);
+    geometry.normals[i] = TMP[0];
+    geometry.normals[i + 1] = TMP[1];
+    geometry.normals[i + 2] = TMP[2];
+    geometry.positions[i] = position[0] + radius * TMP[0];
+    geometry.positions[i + 1] = position[1] + radius * TMP[1];
+    geometry.positions[i + 2] = position[2] + radius * TMP[2];
+  }
+
+  return geometry;
 }
 
-var primitiveTorus = createTorusMesh;
+const TMP$1 = [0, 0, 0];
+/**
+ * @typedef {Object} CylinderOptions
+ * @property {number} [height=1]
+ * @property {number} [radius=0.25]
+ * @property {number} [nx=16]
+ * @property {number} [ny=1]
+ * @property {number} [radiusApex=radius]
+ * @property {number} [capSegments=1]
+ * @property {boolean} [capApex=true]
+ * @property {boolean} [capBase=true]
+ */
 
-function createTorusMesh(opt) {
-  opt = opt || {};
-  var majorRadius = defined(opt.majorRadius, 1);
-  var minorRadius = defined(opt.minorRadius, 0.25);
-  var minorSegments = defined(opt.minorSegments, 32);
-  var majorSegments = defined(opt.majorSegments, 64);
-  var arc = defined(opt.arc, Math.PI * 2);
-  var PI2 = Math.PI * 2;
-  var center = [0, 0, 0];
-  var uvs = [];
-  var positions = [];
-  var cells = [];
-  var tmp = [0, 0, 0];
-  var normals = [];
+/**
+ * @alias module:cylinder
+ * @param {CylinderOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
 
-  for (var j = 0; j <= minorSegments; j++) {
-    for (var i = 0; i <= majorSegments; i++) {
-      var u = i / majorSegments * arc;
-      var v = j / minorSegments * PI2;
-      center[0] = majorRadius * Math.cos(u);
-      center[1] = majorRadius * Math.sin(u);
-      var vertex = [(majorRadius + minorRadius * Math.cos(v)) * Math.cos(u), (majorRadius + minorRadius * Math.cos(v)) * Math.sin(u), minorRadius * Math.sin(v)];
-      positions.push(vertex);
-      subtract_1$1(tmp, vertex, center);
-      normalize_1(tmp, tmp);
-      normals.push(tmp.slice());
-      uvs.push([i / majorSegments, j / minorSegments]);
-    }
-  }
-
-  for (var j = 1; j <= minorSegments; j++) {
-    for (var i = 1; i <= majorSegments; i++) {
-      var a = (majorSegments + 1) * j + i - 1;
-      var b = (majorSegments + 1) * (j - 1) + i - 1;
-      var c = (majorSegments + 1) * (j - 1) + i;
-      var d = (majorSegments + 1) * j + i;
-      cells.push([a, b, d]);
-      cells.push([b, c, d]);
-    }
-  }
-
-  return {
-    uvs: uvs,
-    cells: cells,
-    normals: normals,
-    positions: positions
-  };
-}
-
-function createCylinderMesh(radiusTop, radiusBottom, height, radialSegments, heightSegments) {
-  var index = 0;
-  var indexOffset = 0;
-  var indexArray = [];
-  radiusTop = typeof radiusTop !== 'undefined' ? radiusTop : 1;
-  radiusBottom = typeof radiusBottom !== 'undefined' ? radiusBottom : 1;
-  height = typeof height !== 'undefined' ? height : 5;
-  radialSegments = typeof radialSegments !== 'undefined' ? radialSegments : 64;
-  heightSegments = typeof heightSegments !== 'undefined' ? heightSegments : 8;
-  var capCount = 0;
-
-  if (radiusTop > 0) {
-    capCount++;
-  }
-
-  if (radiusBottom > 0) {
-    capCount++;
-  }
-
-  var vertexCount = (radialSegments + 1) * (heightSegments + 1) + (radialSegments + 2) * capCount;
-  var cellCount = radialSegments * heightSegments * 2 + radialSegments * capCount;
-  var normals = new Array(vertexCount);
-  var vertices = new Array(vertexCount);
-  var uvs = new Array(vertexCount);
-  var cells = new Array(cellCount);
-  var slope = (radiusBottom - radiusTop) / height;
-  var thetaLength = 2.0 * Math.PI;
-
-  for (var y = 0; y <= heightSegments; y++) {
-    var indexRow = [];
-    var v = y / heightSegments;
-    var radius = v * (radiusBottom - radiusTop) + radiusTop;
-
-    for (var x = 0; x <= radialSegments; x++) {
-      var u = x / radialSegments;
-      var theta = u * thetaLength;
-      var sinTheta = Math.sin(theta);
-      var cosTheta = Math.cos(theta);
-      vertices[index] = [radius * sinTheta, -v * height + height / 2, radius * cosTheta];
-      normals[index] = [sinTheta, slope, cosTheta];
-      uvs[index] = [u, 1 - v];
-      indexRow.push(index);
-      index++;
-    }
-
-    indexArray.push(indexRow);
-  }
-
-  for (var x = 0; x < radialSegments; x++) {
-    for (var y = 0; y < heightSegments; y++) {
-      var i1 = indexArray[y][x];
-      var i2 = indexArray[y + 1][x];
-      var i3 = indexArray[y + 1][x + 1];
-      var i4 = indexArray[y][x + 1]; // face one
-
-      cells[indexOffset] = [i1, i2, i4];
-      indexOffset++; // face two
-
-      cells[indexOffset] = [i2, i3, i4];
-      indexOffset++;
-    }
-  }
-
-  var generateCap = function (top) {
-    var vertex = new Array(3).fill(0);
-    var radius = top === true ? radiusTop : radiusBottom;
-    var sign = top === true ? 1 : -1;
-    var centerIndexStart = index;
-
-    for (var x = 1; x <= radialSegments; x++) {
-      vertices[index] = [0, height * sign / 2, 0];
-      normals[index] = [0, sign, 0];
-      uvs[index] = [0.5, 0.5];
-      index++;
-    }
-
-    var centerIndexEnd = index;
-
-    for (var x = 0; x <= radialSegments; x++) {
-      var u = x / radialSegments;
-      var theta = u * thetaLength;
-      var cosTheta = Math.cos(theta);
-      var sinTheta = Math.sin(theta);
-      vertices[index] = [radius * sinTheta, height * sign / 2, radius * cosTheta];
-      normals[index] = [0, sign, 0];
-      uvs[index] = [cosTheta * 0.5 + 0.5, sinTheta * 0.5 * sign + 0.5];
-      index++;
-    }
-
-    for (var x = 0; x < radialSegments; x++) {
-      var c = centerIndexStart + x;
-      var i = centerIndexEnd + x;
-
-      if (top === true) {
-        // face top
-        cells[indexOffset] = [i, i + 1, c];
-        indexOffset++;
-      } else {
-        // face bottom
-        cells[indexOffset] = [i + 1, i, c];
-        indexOffset++;
-      }
-    }
-  };
-
-  if (radiusTop > 0) {
-    generateCap(true);
-  }
-
-  if (radiusBottom > 0) {
-    generateCap(false);
-  }
-
-  return {
-    uvs: uvs,
-    cells: cells,
-    normals: normals,
-    positions: vertices
-  };
-}
-
-var primitiveCylinder = createCylinderMesh;
-
-function createBox(sx, sy, sz) {
-  if (sx === undefined) sx = 1.0;
-  if (sy === undefined) sy = sx;
-  if (sz === undefined) sz = sx;
-  var x = sx / 2;
-  var y = sy / 2;
-  var z = sz / 2;
-  var positions = [//+z
-  [-x, y, z], [-x, -y, z], [x, -y, z], [x, y, z], //-z
-  [x, y, -z], [x, -y, -z], [-x, -y, -z], [-x, y, -z]];
-  var cells = [[0, 1, 2, 3], //+z
-  [3, 2, 5, 4], //+x
-  [4, 5, 6, 7], //-z
-  [7, 6, 1, 0], //-x
-  [7, 0, 3, 4], //+y
-  [1, 6, 5, 2] //-y
-  ];
-  return {
-    positions: positions,
-    cells: cells
-  };
-}
-
-var primitiveBox = createBox;
-
-function primitiveCircle(r, segments) {
-  r = typeof r !== 'undefined' ? r : 1;
-  segments = typeof segments !== 'undefined' ? segments : 32;
-  const positions = [];
-  const cells = [];
+function cylinder({
+  height = 1,
+  radius = 0.25,
+  nx = 16,
+  ny = 1,
+  radiusApex = radius,
+  capSegments = 1,
+  capApex = true,
+  capBase = true
+} = {}) {
+  let capCount = 0;
+  if (capApex) capCount++;
+  if (capBase) capCount++;
+  const segments = nx + 1;
+  const slices = ny + 1;
+  const size = segments * slices + segments * capSegments * 2 * capCount;
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))((nx * ny + nx * capSegments * capCount) * 6);
+  let vertexIndex = 0;
+  let cellIndex = 0;
+  const halfHeight = height / 2;
+  const segmentIncrement = 1 / (segments - 1);
+  const ringIncrement = 1 / (slices - 1);
 
   for (let i = 0; i < segments; i++) {
-    const x = Math.cos(i / segments * Math.PI * 2);
-    const y = Math.sin(i / segments * Math.PI * 2);
-    positions.push([r * x, r * y]);
+    const u = i * segmentIncrement;
+
+    for (let j = 0; j < slices; j++) {
+      const v = j * ringIncrement;
+      const phi = u * TAU;
+      const cosPhi = -Math.cos(phi);
+      const sinPhi = Math.sin(phi);
+      const r = radius * (1 - v) + radiusApex * v;
+      positions[vertexIndex * 3] = r * cosPhi;
+      positions[vertexIndex * 3 + 1] = height * v - halfHeight;
+      positions[vertexIndex * 3 + 2] = r * sinPhi;
+      TMP$1[0] = height * cosPhi;
+      TMP$1[1] = radius - radiusApex;
+      TMP$1[2] = height * sinPhi;
+      normalize(TMP$1);
+      normals[vertexIndex * 3] = TMP$1[0];
+      normals[vertexIndex * 3 + 1] = TMP$1[1];
+      normals[vertexIndex * 3 + 2] = TMP$1[2];
+      uvs[vertexIndex * 2] = u;
+      uvs[vertexIndex * 2 + 1] = v;
+      vertexIndex++;
+    }
+  }
+
+  for (let j = 0; j < slices - 1; j++) {
+    for (let i = 0; i < segments - 1; i++) {
+      cells[cellIndex + 0] = (i + 0) * slices + (j + 0);
+      cells[cellIndex + 1] = (i + 1) * slices + (j + 0);
+      cells[cellIndex + 2] = (i + 1) * slices + (j + 1);
+      cells[cellIndex + 3] = (i + 0) * slices + (j + 0);
+      cells[cellIndex + 4] = (i + 1) * slices + (j + 1);
+      cells[cellIndex + 5] = (i + 0) * slices + (j + 1);
+      cellIndex += 6;
+    }
+  }
+
+  function computeCap(flip, height, radius) {
+    const index = vertexIndex;
+    const segmentIncrement = 1 / (segments - 1);
+
+    for (let r = 0; r < capSegments; r++) {
+      for (let i = 0; i < segments; i++) {
+        const cosPhi = -Math.cos(i * segmentIncrement * TAU);
+        const sinPhi = Math.sin(i * segmentIncrement * TAU); // inner point
+
+        positions[vertexIndex * 3] = radius * cosPhi * r / capSegments;
+        positions[vertexIndex * 3 + 1] = height;
+        positions[vertexIndex * 3 + 2] = radius * sinPhi * r / capSegments;
+        normals[vertexIndex * 3] = 0;
+        normals[vertexIndex * 3 + 1] = -flip;
+        normals[vertexIndex * 3 + 2] = 0;
+        uvs[vertexIndex * 2] = 0.5 * cosPhi * r / capSegments + 0.5;
+        uvs[vertexIndex * 2 + 1] = 0.5 * sinPhi * r / capSegments + 0.5;
+        vertexIndex++; // outer point
+
+        positions[vertexIndex * 3] = radius * cosPhi * (r + 1) / capSegments;
+        positions[vertexIndex * 3 + 1] = height;
+        positions[vertexIndex * 3 + 2] = radius * sinPhi * (r + 1) / capSegments;
+        normals[vertexIndex * 3] = 0;
+        normals[vertexIndex * 3 + 1] = -flip;
+        normals[vertexIndex * 3 + 2] = 0;
+        uvs[vertexIndex * 2] = 0.5 * (cosPhi * (r + 1)) / capSegments + 0.5;
+        uvs[vertexIndex * 2 + 1] = 0.5 * (sinPhi * (r + 1)) / capSegments + 0.5;
+        vertexIndex++;
+      }
+    }
+
+    for (let r = 0; r < capSegments; r++) {
+      for (let i = 0; i < segments - 1; i++) {
+        const n = index + r * segments * 2 + i * 2;
+        const a = n + 0;
+        const b = n + 1;
+        const c = n + 2;
+        const d = n + 3;
+
+        if (flip === 1) {
+          cells[cellIndex] = a;
+          cells[cellIndex + 1] = c;
+          cells[cellIndex + 2] = d;
+          cells[cellIndex + 3] = a;
+          cells[cellIndex + 4] = d;
+          cells[cellIndex + 5] = b;
+        } else {
+          cells[cellIndex + 0] = a;
+          cells[cellIndex + 1] = d;
+          cells[cellIndex + 2] = c;
+          cells[cellIndex + 3] = a;
+          cells[cellIndex + 4] = b;
+          cells[cellIndex + 5] = d;
+        }
+
+        cellIndex += 6;
+      }
+    }
+  }
+
+  if (capBase) computeCap(1, -halfHeight, radius);
+  if (capApex) computeCap(-1, halfHeight, radiusApex);
+  return {
+    positions,
+    normals,
+    uvs,
+    cells
+  };
+}
+
+/**
+ * @module cone
+ */
+/**
+ * @typedef {Object} ConeOptions
+ * @property {number} [height=1]
+ * @property {number} [radius=0.25]
+ * @property {number} [nx=16]
+ * @property {number} [ny=1]
+ * @property {number} [capSegments=1]
+ * @property {boolean} [capBase=true]
+ */
+
+/**
+ * @alias module:cone
+ * @param {ConeOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+const cone = ({
+  height,
+  radius,
+  nx,
+  ny,
+  capSegments,
+  capBase
+} = {}) => cylinder({
+  height,
+  radius,
+  nx,
+  ny,
+  capSegments,
+  capBase,
+  radiusApex: 0,
+  capApex: false
+});
+
+/**
+ * @typedef {Object} CapsuleOptions
+ * @property {number} [height=1]
+ * @property {number} [radius=0.25]
+ * @property {number} [nx=16]
+ * @property {number} [ny=32]
+ */
+
+/**
+ * @alias module:capsule
+ * @param {CapsuleOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function capsule({
+  height = 0.5,
+  radius = 0.25,
+  nx = 16,
+  ny = 32
+} = {}) {
+  const ringsBody = ny + 1;
+  const ringsTotal = ny + ringsBody;
+  const size = ringsTotal * nx;
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))((ringsTotal - 1) * (nx - 1) * 6);
+  let vertexIndex = 0;
+  let cellIndex = 0;
+  const segmentIncrement = 1 / (nx - 1);
+  const ringIncrement = 1 / (ny - 1);
+  const bodyIncrement = 1 / (ringsBody - 1);
+
+  function computeRing(r, y, dy) {
+    for (let s = 0; s < nx; s++) {
+      const x = -Math.cos(s * segmentIncrement * TAU) * r;
+      const z = Math.sin(s * segmentIncrement * TAU) * r;
+      const py = radius * y + height * dy;
+      positions[vertexIndex * 3] = radius * x;
+      positions[vertexIndex * 3 + 1] = py;
+      positions[vertexIndex * 3 + 2] = radius * z;
+      normals[vertexIndex * 3] = x;
+      normals[vertexIndex * 3 + 1] = y;
+      normals[vertexIndex * 3 + 2] = z;
+      uvs[vertexIndex * 2] = s * segmentIncrement;
+      uvs[vertexIndex * 2 + 1] = 1 - (0.5 - py / (2 * radius + height));
+      vertexIndex++;
+    }
+  }
+
+  for (let r = 0; r < ringsBody; r++) {
+    computeRing(1, 0, r * bodyIncrement - 0.5);
+  }
+
+  for (let r = 0; r < ny; r++) {
+    if (r < ny * 0.5) {
+      computeRing(Math.sin(Math.PI * r * ringIncrement), Math.sin(Math.PI * (r * ringIncrement - 0.5)), -0.5);
+    } else {
+      computeRing(Math.sin(Math.PI * r * ringIncrement), Math.sin(Math.PI * (r * ringIncrement - 0.5)), 0.5);
+    }
+  }
+
+  for (let r = 0; r < ringsTotal - 1; r++) {
+    for (let s = 0; s < nx - 1; s++) {
+      const a = r * nx;
+      const b = (r + 1) * nx;
+      const s1 = s + 1;
+      cells[cellIndex] = a + s;
+      cells[cellIndex + 1] = a + s1;
+      cells[cellIndex + 2] = b + s1;
+      cells[cellIndex + 3] = a + s;
+      cells[cellIndex + 4] = b + s1;
+      cells[cellIndex + 5] = b + s;
+      cellIndex += 6;
+    }
+  }
+
+  return {
+    positions,
+    normals,
+    uvs,
+    cells
+  };
+}
+
+const TMP$2 = [0, 0, 0];
+/**
+ * @typedef {Object} EllipsoidOptions
+ * @property {number} [radius=0.5]
+ * @property {number} [nx=32]
+ * @property {number} [ny=16]
+ * @property {number} [rx=1]
+ * @property {number} [rx=0.5]
+ * @property {number} [rz=ry]
+ */
+
+/**
+ * Default to an oblate spheroid.
+ * @alias module:ellipsoid
+ * @param {EllipsoidOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function ellipsoid({
+  radius = 1,
+  nx = 32,
+  ny = 16,
+  rx = 0.5,
+  ry = 0.25,
+  rz = ry
+} = {}) {
+  const size = (ny + 1) * (nx + 1);
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))(ny * nx * 6);
+  let vertexIndex = 0;
+  let cellIndex = 0;
+
+  for (let y = 0; y <= ny; y++) {
+    const v = y / ny;
+    const theta = v * Math.PI;
+    const cosTheta = Math.cos(theta);
+    const sinTheta = Math.sin(theta);
+
+    for (let x = 0; x <= nx; x++) {
+      const u = x / nx;
+      const phi = u * TAU;
+      const cosPhi = Math.cos(phi);
+      const sinPhi = Math.sin(phi);
+      TMP$2[0] = -rx * cosPhi * sinTheta;
+      TMP$2[1] = -ry * cosTheta;
+      TMP$2[2] = rz * sinPhi * sinTheta;
+      positions[vertexIndex * 3] = radius * TMP$2[0];
+      positions[vertexIndex * 3 + 1] = radius * TMP$2[1];
+      positions[vertexIndex * 3 + 2] = radius * TMP$2[2];
+      normalize(TMP$2);
+      normals[vertexIndex * 3] = TMP$2[0];
+      normals[vertexIndex * 3 + 1] = TMP$2[1];
+      normals[vertexIndex * 3 + 2] = TMP$2[2];
+      uvs[vertexIndex * 2] = u;
+      uvs[vertexIndex * 2 + 1] = v;
+      vertexIndex++;
+    }
+
+    if (y > 0) {
+      for (let i = vertexIndex - 2 * (nx + 1); i + nx + 2 < vertexIndex; i++) {
+        const a = i;
+        const b = i + 1;
+        const c = i + nx + 1;
+        const d = i + nx + 2;
+        cells[cellIndex] = a;
+        cells[cellIndex + 1] = b;
+        cells[cellIndex + 2] = c;
+        cells[cellIndex + 3] = c;
+        cells[cellIndex + 4] = b;
+        cells[cellIndex + 5] = d;
+        cellIndex += 6;
+      }
+    }
+  }
+
+  return {
+    positions,
+    normals,
+    uvs,
+    cells
+  };
+}
+
+/**
+ * @module sphere
+ */
+/**
+ * @typedef {Object} SphereOptions
+ * @property {number} [radius=0.5]
+ * @property {number} [nx=32]
+ * @property {number} [ny=16]
+ */
+
+/**
+ * @alias module:sphere
+ * @param {SphereOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+const sphere = ({
+  radius = 0.5,
+  nx = 32,
+  ny = 16
+} = {}) => ellipsoid({
+  radius,
+  nx,
+  ny,
+  rx: 1,
+  ry: 1
+});
+
+const f = 0.5 + Math.sqrt(5) / 2;
+/**
+ * @typedef {Object} IcosphereOptions
+ * @property {number} [radius=0.5]
+ * @property {number} [subdivisions=2]
+ */
+
+/**
+ * @alias module:icosphere
+ * @param {IcosphereOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function icosphere({
+  radius = 0.5,
+  subdivisions = 2
+} = {}) {
+  if (subdivisions > 10) throw new Error("Max subdivisions is 10.");
+  const T = Math.pow(4, subdivisions);
+  const numVertices = 10 * T + 2;
+  const numDuplicates = subdivisions === 0 ? 3 : Math.pow(2, subdivisions) * 3 + 9;
+  const size = numVertices + numDuplicates;
+  const positions = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2); // prettier-ignore
+
+  positions.set(Float32Array.of(-1, f, 0, 1, f, 0, -1, -f, 0, 1, -f, 0, 0, -1, f, 0, 1, f, 0, -1, -f, 0, 1, -f, f, 0, -1, f, 0, 1, -f, 0, -1, -f, 0, 1)); // prettier-ignore
+
+  let cells = Uint16Array.of(0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11, 11, 10, 2, 5, 11, 4, 1, 5, 9, 7, 1, 8, 10, 7, 6, 3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9, 9, 8, 1, 4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7);
+  let vertexIndex = 12;
+  const midCache = subdivisions ? {} : null;
+
+  function addMidPoint(a, b) {
+    // Cantor's pairing function
+    const key = Math.floor((a + b) * (a + b + 1) / 2 + Math.min(a, b));
+    const i = midCache[key];
+
+    if (i !== undefined) {
+      delete midCache[key];
+      return i;
+    }
+
+    midCache[key] = vertexIndex;
+    positions[3 * vertexIndex + 0] = (positions[3 * a + 0] + positions[3 * b + 0]) * 0.5;
+    positions[3 * vertexIndex + 1] = (positions[3 * a + 1] + positions[3 * b + 1]) * 0.5;
+    positions[3 * vertexIndex + 2] = (positions[3 * a + 2] + positions[3 * b + 2]) * 0.5;
+    return vertexIndex++;
+  }
+
+  let cellsPrev = cells;
+  const IndexArray = subdivisions > 5 ? Uint32Array : getCellsTypedArray(size); // Subdivide
+
+  for (let i = 0; i < subdivisions; i++) {
+    const prevLen = cellsPrev.length;
+    cells = new IndexArray(prevLen * 4);
+
+    for (let k = 0; k < prevLen; k += 3) {
+      const v1 = cellsPrev[k + 0];
+      const v2 = cellsPrev[k + 1];
+      const v3 = cellsPrev[k + 2];
+      const a = addMidPoint(v1, v2);
+      const b = addMidPoint(v2, v3);
+      const c = addMidPoint(v3, v1);
+      cells[k * 4 + 0] = v1;
+      cells[k * 4 + 1] = a;
+      cells[k * 4 + 2] = c;
+      cells[k * 4 + 3] = v2;
+      cells[k * 4 + 4] = b;
+      cells[k * 4 + 5] = a;
+      cells[k * 4 + 6] = v3;
+      cells[k * 4 + 7] = c;
+      cells[k * 4 + 8] = b;
+      cells[k * 4 + 9] = a;
+      cells[k * 4 + 10] = b;
+      cells[k * 4 + 11] = c;
+    }
+
+    cellsPrev = cells;
+  } // Normalize
+
+
+  for (let i = 0; i < numVertices * 3; i += 3) {
+    const v1 = positions[i + 0];
+    const v2 = positions[i + 1];
+    const v3 = positions[i + 2];
+    const m = 1 / Math.sqrt(v1 * v1 + v2 * v2 + v3 * v3);
+    positions[i + 0] *= m;
+    positions[i + 1] *= m;
+    positions[i + 2] *= m;
+  }
+
+  for (let i = 0; i < numVertices; i++) {
+    uvs[2 * i + 0] = -Math.atan2(positions[3 * i + 2], positions[3 * i]) / TAU + 0.5;
+    uvs[2 * i + 1] = Math.asin(positions[3 * i + 1]) / Math.PI + 0.5;
+  }
+
+  const duplicates = {};
+
+  function addDuplicate(i, uvx, uvy, cached) {
+    if (cached) {
+      const dupe = duplicates[i];
+      if (dupe !== undefined) return dupe;
+    }
+
+    positions[3 * vertexIndex + 0] = positions[3 * i + 0];
+    positions[3 * vertexIndex + 1] = positions[3 * i + 1];
+    positions[3 * vertexIndex + 2] = positions[3 * i + 2];
+    uvs[2 * vertexIndex + 0] = uvx;
+    uvs[2 * vertexIndex + 1] = uvy;
+    if (cached) duplicates[i] = vertexIndex;
+    return vertexIndex++;
+  }
+
+  for (let i = 0; i < cells.length; i += 3) {
+    const a = cells[i + 0];
+    const b = cells[i + 1];
+    const c = cells[i + 2];
+    let ax = uvs[2 * a];
+    let bx = uvs[2 * b];
+    let cx = uvs[2 * c];
+    const ay = uvs[2 * a + 1];
+    const by = uvs[2 * b + 1];
+    const cy = uvs[2 * c + 1];
+    if (ax - bx >= 0.5 && ay !== 1) bx += 1;
+    if (bx - cx > 0.5) cx += 1;
+    if (ax < 0.5 && cx - ax > 0.5 || ax === 1 && cy === 0) ax += 1;
+    if (bx < 0.5 && ax - bx > 0.5) bx += 1; // Poles
+
+    const isPoleA = ay === 0 || ay === 1;
+    const isPoleB = by === 0 || by === 1;
+    const isPoleC = cy === 0 || cy === 1;
+
+    if (isPoleA) {
+      ax = (bx + cx) * 0.5;
+
+      if (ay === 1 - bx) {
+        uvs[2 * a] = ax;
+      } else {
+        cells[i + 0] = addDuplicate(a, ax, ay, false);
+      }
+    } else if (isPoleB) {
+      bx = (ax + cx) * 0.5;
+
+      if (by === ax) {
+        uvs[2 * b] = bx;
+      } else {
+        cells[i + 1] = addDuplicate(b, bx, by, false);
+      }
+    } else if (isPoleC) {
+      cx = (ax + bx) * 0.5;
+
+      if (cy === ax) {
+        uvs[2 * c] = cx;
+      } else {
+        cells[i + 2] = addDuplicate(c, cx, cy, false);
+      }
+    } // Seam zipper
+
+
+    if (ax !== uvs[2 * a] && !isPoleA) {
+      cells[i + 0] = addDuplicate(a, ax, ay, true);
+    }
+
+    if (bx !== uvs[2 * b] && !isPoleB) {
+      cells[i + 1] = addDuplicate(b, bx, by, true);
+    }
+
+    if (cx !== uvs[2 * c] && !isPoleC) {
+      cells[i + 2] = addDuplicate(c, cx, cy, true);
+    }
+  }
+
+  return {
+    positions: positions.map(v => v * radius),
+    normals: positions,
+    uvs,
+    cells
+  };
+}
+
+const TMP$3 = [0, 0, 0];
+/**
+ * @typedef {Object} TorusOptions
+ * @property {number} [radius=0.5]
+ * @property {number} [segments=64]
+ * @property {number} [minorRadius=0.1]
+ * @property {number} [minorSegments=16]
+ * @property {number} [arc=2 * Math.PI]
+ */
+
+/**
+ * @alias module:torus
+ * @param {TorusOptions} [options={}]
+ * @returns {import("../types.js").SimplicialComplex}
+ */
+
+function torus({
+  radius = 0.3,
+  segments = 64,
+  minorRadius = 0.1,
+  minorSegments = 32,
+  arc = TAU
+} = {}) {
+  const size = (minorSegments + 1) * (segments + 1);
+  const positions = new Float32Array(size * 3);
+  const normals = new Float32Array(size * 3);
+  const uvs = new Float32Array(size * 2);
+  const cells = new (getCellsTypedArray(size))(minorSegments * segments * 6);
+  let vertexIndex = 0;
+  let cellIndex = 0;
+
+  for (let j = 0; j <= minorSegments; j++) {
+    const v = j / minorSegments;
+
+    for (let i = 0; i <= segments; i++) {
+      const u = i / segments;
+      const phi = u * arc;
+      const cosPhi = -Math.cos(phi);
+      const sinPhi = Math.sin(phi);
+      const theta = v * TAU;
+      const cosTheta = -Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      TMP$3[0] = (radius + minorRadius * cosTheta) * cosPhi;
+      TMP$3[1] = (radius + minorRadius * cosTheta) * sinPhi;
+      TMP$3[2] = minorRadius * sinTheta;
+      positions[vertexIndex * 3] = TMP$3[0];
+      positions[vertexIndex * 3 + 1] = TMP$3[1];
+      positions[vertexIndex * 3 + 2] = TMP$3[2];
+      TMP$3[0] -= radius * cosPhi;
+      TMP$3[1] -= radius * sinPhi;
+      normalize(TMP$3);
+      normals[vertexIndex * 3] = TMP$3[0];
+      normals[vertexIndex * 3 + 1] = TMP$3[1];
+      normals[vertexIndex * 3 + 2] = TMP$3[2];
+      uvs[vertexIndex * 2] = u;
+      uvs[vertexIndex * 2 + 1] = v;
+      vertexIndex++;
+
+      if (j > 0 && i > 0) {
+        const a = (segments + 1) * j + i - 1;
+        const b = (segments + 1) * (j - 1) + i - 1;
+        const c = (segments + 1) * (j - 1) + i;
+        const d = (segments + 1) * j + i;
+        cells[cellIndex] = a;
+        cells[cellIndex + 1] = b;
+        cells[cellIndex + 2] = d;
+        cells[cellIndex + 3] = b;
+        cells[cellIndex + 4] = c;
+        cells[cellIndex + 5] = d;
+        cellIndex += 6;
+      }
+    }
+  }
+
+  return {
+    positions,
+    normals,
+    uvs,
+    cells
+  };
+}
+
+/**
+ * @module box
+ */
+
+/**
+ * @typedef {Object} BoxOptions
+ * @property {number} [sx=1]
+ * @property {number} [sy=sx]
+ * @property {number} [sz=sx]
+ */
+
+/**
+ * @alias module:box
+ * @param {BoxOptions} [options={}]
+ * @returns {import("../types.js").BasicSimplicialComplex}
+ */
+function box({
+  sx = 1,
+  sy = sx,
+  sz = sx
+} = {}) {
+  const x = sx / 2;
+  const y = sy / 2;
+  const z = sz / 2;
+  return {
+    // prettier-ignore
+    positions: Float32Array.of(-x, y, z, -x, -y, z, x, -y, z, x, y, z, // -z
+    x, y, -z, x, -y, -z, -x, -y, -z, -x, y, -z),
+    // prettier-ignore
+    cells: Uint8Array.of(0, 1, 2, 3, // +z
+    3, 2, 5, 4, // +x
+    4, 5, 6, 7, // -z
+    7, 6, 1, 0, // -x
+    7, 0, 3, 4, // +y
+    1, 6, 5, 2 // -y
+    )
+  };
+}
+
+/**
+ * @typedef {Object} BoxOptions
+ * @property {number} [radius=0.5]
+ * @property {number} [segments=32]
+ */
+
+/**
+ * @alias module:circle
+ * @param {BoxOptions} [options={}]
+ * @returns {import("../types.js").BasicSimplicialComplex}
+ */
+
+function circle({
+  radius = 0.5,
+  segments = 32
+} = {}) {
+  const positions = new Float32Array(segments * 2);
+  const cells = new (getCellsTypedArray(segments))((segments - 1) * 2);
+
+  for (let i = 0; i < segments; i++) {
+    positions[i * 2] = radius * Math.cos(i / segments * TAU);
+    positions[i * 2 + 1] = radius * Math.sin(i / segments * TAU);
 
     if (i > 0) {
-      cells.push([i - 1, i]);
+      cells[(i - 1) * 2] = i - 1;
+      cells[(i - 1) * 2 + 1] = i;
     }
   }
 
@@ -1463,34 +1033,4 @@ function primitiveCircle(r, segments) {
   };
 }
 
-var primitiveCircle_1 = primitiveCircle;
-
-var primitiveGeometry = {
-  quad: primitiveQuad_1,
-  plane: primitivePlane,
-  cube: primitiveCube,
-  roundedCube: primitiveRoundedCube,
-  capsule: primitiveCapsule,
-  sphere: primitiveSphere_1,
-  icosphere: primitiveIcosphere,
-  ellipsoid: primitiveEllipsoid,
-  torus: primitiveTorus,
-  cylinder: primitiveCylinder,
-  box: primitiveBox,
-  circle: primitiveCircle_1
-};
-
-var box = primitiveGeometry.box;
-var capsule = primitiveGeometry.capsule;
-var circle = primitiveGeometry.circle;
-var cube = primitiveGeometry.cube;
-var cylinder = primitiveGeometry.cylinder;
-export default primitiveGeometry;
-var ellipsoid = primitiveGeometry.ellipsoid;
-var icosphere$1 = primitiveGeometry.icosphere;
-var plane = primitiveGeometry.plane;
-var quad = primitiveGeometry.quad;
-var roundedCube = primitiveGeometry.roundedCube;
-var sphere = primitiveGeometry.sphere;
-var torus = primitiveGeometry.torus;
-export { primitiveGeometry as __moduleExports, box, capsule, circle, cube, cylinder, ellipsoid, icosphere$1 as icosphere, plane, quad, roundedCube, sphere, torus };
+export { box, capsule, circle, cone, cube, cylinder, ellipsoid, icosphere, plane, quad, roundedCube, sphere, torus, utils };

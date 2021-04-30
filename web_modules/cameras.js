@@ -1,6 +1,6 @@
-import { f as fromValues, c as create, a as create$1, l as lookAt, b as copy, i as invert, d as frustum, p as perspective, o as ortho, e as create$2, v as vec2, s as subtract, g as distance, h as set, j as copy$1, k as create$3, m as copy$2, n as subtract$1, q as length, r as sub, t as add, u as scale, w as transformQuat, x as rotationTo, y as invert$1, z as glMatrix } from './common/vec2-5cf6e4c3.js';
-import './common/es.string.replace-86964312.js';
-import './common/es.typed-array.float32-array-fbd9f825.js';
+import { f as fromValues, c as create, a as create$1, l as lookAt, b as copy, i as invert, d as frustum, p as perspective, o as ortho, e as create$2, z as zero, s as subtract, g as distance, h as set, j as copy$1, k as create$3, m as copy$2, n as subtract$1, q as length, r as sub, t as add, u as scale, v as transformQuat, w as rotationTo, x as invert$1, y as glMatrix } from './common/vec2-82b35bd6.js';
+import './common/es.string.replace-77fbd93f.js';
+import './common/es.typed-array.float32-array-5404dd41.js';
 
 // Camera
 var CameraType;
@@ -740,7 +740,7 @@ class PointerManager {
 
   getPointerPosition(event) {
     if (PointerManager.isTouchEvent(event)) {
-      undefined(tempPointer);
+      zero(tempPointer);
       this.setTouchBaryCenter(tempPointer, event);
     } else {
       tempPointer[0] = event.clientX;

@@ -1,6 +1,6 @@
 {
   "name": "geom-export-obj",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs) into an OBJ string.",
   "keywords": [
     "geom",
@@ -12,7 +12,10 @@
   ],
   "homepage": "https://github.com/dmnsgn/geom-export-obj",
   "bugs": "https://github.com/dmnsgn/geom-export-obj/issues",
-  "repository": "dmnsgn/geom-export-obj",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmnsgn/geom-export-obj.git"
+  },
   "funding": [
     {
       "type": "individual",

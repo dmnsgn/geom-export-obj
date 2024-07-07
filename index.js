@@ -14,7 +14,7 @@
 function parse(
   { positions, normals, uvs, cells, name, materialName },
   offsets = { positions: 0, normals: 0, uvs: 0 },
-  defaultName
+  defaultName,
 ) {
   // object name
   let output = `o ${name || defaultName}\n`;
@@ -54,7 +54,7 @@ function parse(
           normals ? `${cellIndex + 1 + offsets.normals}` : false,
         ]
           .filter((a) => a ?? true)
-          .join("/")
+          .join("/"),
       );
       output += `f ${face.join(" ")}\n`;
     }
@@ -94,10 +94,12 @@ function geomExportObj(geometries, options = {}) {
 
       return current;
     },
-    { output: header, offsets }
+    { output: header, offsets },
   );
 }
 
 export { parse };
 
 export default geomExportObj;
+
+export * from "./types.js";

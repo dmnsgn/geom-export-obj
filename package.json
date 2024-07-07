@@ -31,15 +31,16 @@
   "main": "index.js",
   "types": "types/index.d.ts",
   "devDependencies": {
-    "cameras": "^3.0.1",
-    "core-js": "^3.11.1",
-    "es-module-shims": "^0.10.4",
-    "gl-matrix": "^3.3.0",
-    "primitive-geometry": "^2.0.0",
+    "cameras": "^3.1.1",
+    "core-js": "^3.37.1",
+    "es-module-shims": "^1.10.0",
+    "gl-matrix": "^3.4.3",
+    "primitive-geometry": "^2.10.1",
     "regl": "^2.1.0"
   },
   "engines": {
-    "node": ">=15.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=22.0.0",
+    "npm": ">=10.5.1",
+    "snowdev": ">=2.2.x"
   }
 }

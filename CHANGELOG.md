@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.1.0](https://github.com/dmnsgn/geom-export-obj/compare/v2.0.0...v2.1.0) (2025-03-13)
+
+
+### Features
+
+* add support for precision ([7b3e426](https://github.com/dmnsgn/geom-export-obj/commit/7b3e42676a8bee89c78b53d371b1aebb7ba0c94e))
+
+
+
 # [2.0.0](https://github.com/dmnsgn/geom-export-obj/compare/v1.1.1...v2.0.0) (2025-03-13)
 
 

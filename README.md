@@ -65,7 +65,7 @@ console.log(geomExportObj(cube()).output);
 
 - [geomExportObj](#module_geomExportObj)
   - [geomExportObj(geometries, [options])](#exp_module_geomExportObj--geomExportObj) ⇒ [<code>GeomExportObjReturnValue</code>](#GeomExportObjReturnValue) ⏏
-    - [.parse(geometry, [offsets], [defaultName])](#module_geomExportObj--geomExportObj.parse) ⇒ <code>string</code>
+    - [.parse(geometry, [offsets], [defaultName], [precision])](#module_geomExportObj--geomExportObj.parse) ⇒ <code>string</code>
 
 <a name="exp_module_geomExportObj--geomExportObj"></a>
 
@@ -82,7 +82,7 @@ Parse one or more simplicial complex geometry and return an obj string and verti
 
 <a name="module_geomExportObj--geomExportObj.parse"></a>
 
-#### geomExportObj.parse(geometry, [offsets], [defaultName]) ⇒ <code>string</code>
+#### geomExportObj.parse(geometry, [offsets], [defaultName], [precision]) ⇒ <code>string</code>
 
 Parse a simplicial complex and return an obj string
 
@@ -92,11 +92,12 @@ Parse a simplicial complex and return an obj string
 - http://paulbourke.net/dataformats/obj/
 - https://paulbourke.net/dataformats/obj/colour.html
 
-| Param         | Type                                                       | Default                                            | Description                                              |
-| ------------- | ---------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
-| geometry      | [<code>SimplicialComplex</code>](#SimplicialComplex)       |                                                    |                                                          |
-| [offsets]     | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }}</code> |                                                          |
-| [defaultName] | <code>string</code>                                        |                                                    | A name for the object if geometry.name is not specified. |
+| Param         | Type                                                       | Default                                            | Description                                                     |
+| ------------- | ---------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------- |
+| geometry      | [<code>SimplicialComplex</code>](#SimplicialComplex)       |                                                    |                                                                 |
+| [offsets]     | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }}</code> |                                                                 |
+| [defaultName] | <code>string</code>                                        |                                                    | A name for the object if geometry.name is not specified.        |
+| [precision]   | <code>number</code>                                        |                                                    | Decimal digit precision for positions/normals/uvs/vertexColors. |
 
 <a name="SimplicialComplex"></a>
 
@@ -140,11 +141,12 @@ Options for exporter.
 **Kind**: global typedef
 **Properties**
 
-| Name      | Type                                                       | Default                                           | Description                         |
-| --------- | ---------------------------------------------------------- | ------------------------------------------------- | ----------------------------------- |
-| [header]  | <code>string</code>                                        | <code>&quot;# geom-export-obj\\n&quot;</code>     | Header to be prepended to the file. |
-| [prefix]  | <code>string</code>                                        | <code>&quot;Mesh\_&quot;</code>                   | Prefix for object names.            |
-| [offsets] | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }</code> | The initial offsets for cells.      |
+| Name        | Type                                                       | Default                                           | Description                                                     |
+| ----------- | ---------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------- |
+| [header]    | <code>string</code>                                        | <code>&quot;# geom-export-obj\\n&quot;</code>     | Header to be prepended to the file.                             |
+| [prefix]    | <code>string</code>                                        | <code>&quot;Mesh\_&quot;</code>                   | Prefix for object names.                                        |
+| [offsets]   | [<code>GeomExportObjOffsets</code>](#GeomExportObjOffsets) | <code>{ positions: 0, normals: 0, uvs: 0 }</code> | The initial offsets for cells.                                  |
+| [precision] | <code>number</code>                                        |                                                   | Decimal digit precision for positions/normals/uvs/vertexColors. |
 
 <a name="GeomExportObjReturnValue"></a>
 

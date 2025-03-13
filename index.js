@@ -1,18 +1,17 @@
-/**
- * @module geomExportObj
- */
+/** @module geomExportObj */
 
 /**
  * Parse a simplicial complex and return an obj string
  *
  * @see http://paulbourke.net/dataformats/obj/
+ * @see https://paulbourke.net/dataformats/obj/colour.html
  * @param {import("./types.js").SimplicialComplex} geometry
  * @param {import("./types.js").GeomExportObjOffsets} [offsets={ positions: 0, normals: 0, uvs: 0 }}]
  * @param {string} [defaultName] A name for the object if geometry.name is not specified.
  * @returns {string}
  */
 function parse(
-  { positions, normals, uvs, cells, name, materialName },
+  { positions, normals, uvs, cells, vertexColors, name, materialName },
   offsets = { positions: 0, normals: 0, uvs: 0 },
   defaultName,
 ) {
@@ -22,10 +21,19 @@ function parse(
   // material name
   if (materialName) output += `usemtl ${materialName}\n`;
 
-  // geometric vertices
+  // geometric vertices and optional vertex colors
   if (positions) {
+    let vertexColorsSize;
+    const getVertexColors = (positionIndex) => {
+      if (!vertexColors) return "";
+      vertexColorsSize ||=
+        vertexColors?.length / 4 === positions.length / 3 ? 4 : 3;
+      const i = (positionIndex / 3) * vertexColorsSize;
+      return ` ${vertexColors[i]} ${vertexColors[i + 1]} ${vertexColors[i + 2]}`;
+    };
+
     for (let i = 0; i < positions.length; i += 3) {
-      output += `v ${positions[i]} ${positions[i + 1]} ${positions[i + 2]}\n`;
+      output += `v ${positions[i]} ${positions[i + 1]} ${positions[i + 2]}${getVertexColors(i)}\n`;
     }
   }
 

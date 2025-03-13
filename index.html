@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -57,6 +57,13 @@
 
       const planeGeometry = plane();
       planeGeometry.name = `Plane_All`;
+      // prettier-ignore
+      planeGeometry.vertexColors = Float32Array.of(
+        1, 0, 0, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 1, 1, 1,
+      );
 
       const planeNoUVsGeometry = plane();
       delete planeNoUVsGeometry.uvs;
@@ -100,12 +107,15 @@
   uniform mat4 model, view, projection;
   attribute vec3 position, normal;
   attribute vec2 uv;
+  attribute vec3 vertexColor;
   varying vec3 vNormal;
   varying vec2 vUv;
+  varying vec3 vColor;
 
   void main () {
     vNormal = normal;
     vUv = uv;
+    vColor = vertexColor;
     gl_Position = projection * view * model * vec4(position, 1.0);
   }`,
         frag: /* glsl */ `
@@ -113,15 +123,21 @@
 
     varying vec3 vNormal;
     varying vec2 vUv;
+    varying vec3 vColor;
 
     void main () {
-      gl_FragColor = vec4(vUv, 0.0, 1.0);
+      if (length(vColor) == 0.0) {
+        gl_FragColor = vec4(vUv, 0.0, 1.0);
+      } else {
+        gl_FragColor = vec4(vColor, 1.0);
+      }
       // gl_FragColor = vec4(vNormal * 0.5 + 0.5, 1.0);
     }`,
         attributes: {
           position: regl.prop("positions"),
           normal: regl.prop("normals"),
           uv: regl.prop("uvs"),
+          vertexColor: regl.prop("vertexColors"),
         },
         elements: regl.prop("cells"),
         uniforms: {
@@ -152,6 +168,7 @@
             ...geometry,
             normals: geometry.normals || geometry.positions,
             uvs: geometry.uvs || geometry.positions.map(() => 1),
+            vertexColors: geometry.vertexColors || geometry.positions.map(() => 0),
             model,
             projection: perspectiveCamera.projectionMatrix,
             view: perspectiveCamera.viewMatrix,

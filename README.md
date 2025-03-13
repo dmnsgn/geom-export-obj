@@ -87,7 +87,10 @@ Parse one or more simplicial complex geometry and return an obj string and verti
 Parse a simplicial complex and return an obj string
 
 **Kind**: static method of [<code>geomExportObj</code>](#exp_module_geomExportObj--geomExportObj)
-**See**: http://paulbourke.net/dataformats/obj/
+**See**
+
+- http://paulbourke.net/dataformats/obj/
+- https://paulbourke.net/dataformats/obj/colour.html
 
 | Param         | Type                                                       | Default                                            | Description                                              |
 | ------------- | ---------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |

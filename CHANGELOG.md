@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0](https://github.com/dmnsgn/geom-export-obj/compare/v1.1.1...v2.0.0) (2025-03-13)
+
+
+### Features
+
+* add support for vertex colors ([2f48377](https://github.com/dmnsgn/geom-export-obj/commit/2f483775e8ba10c9d70ead6b20df834323f20f0d))
+
+
+### BREAKING CHANGES
+
+* geometric vertex infos will now range from 3 to 6 values
+
+
+
 ## [1.1.1](https://github.com/dmnsgn/geom-export-obj/compare/v1.1.0...v1.1.1) (2024-07-07)
 
 

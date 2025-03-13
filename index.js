@@ -8,12 +8,14 @@
  * @param {import("./types.js").SimplicialComplex} geometry
  * @param {import("./types.js").GeomExportObjOffsets} [offsets={ positions: 0, normals: 0, uvs: 0 }}]
  * @param {string} [defaultName] A name for the object if geometry.name is not specified.
+ * @param {number} [precision] Decimal digit precision for positions/normals/uvs/vertexColors.
  * @returns {string}
  */
 function parse(
   { positions, normals, uvs, cells, vertexColors, name, materialName },
   offsets = { positions: 0, normals: 0, uvs: 0 },
   defaultName,
+  precision,
 ) {
   // object name
   let output = `o ${name || defaultName}\n`;
@@ -21,33 +23,42 @@ function parse(
   // material name
   if (materialName) output += `usemtl ${materialName}\n`;
 
+  // Helper for number precision
+  let numberPrecisionScale;
+  const getNumber = (n) => {
+    if (!precision) return n;
+    numberPrecisionScale ||= 10 ** precision;
+    return Math.floor(n * numberPrecisionScale) / numberPrecisionScale;
+  };
+
   // geometric vertices and optional vertex colors
   if (positions) {
+    // Helper for vertex colors parsing and formating
     let vertexColorsSize;
     const getVertexColors = (positionIndex) => {
       if (!vertexColors) return "";
       vertexColorsSize ||=
         vertexColors?.length / 4 === positions.length / 3 ? 4 : 3;
       const i = (positionIndex / 3) * vertexColorsSize;
-      return ` ${vertexColors[i]} ${vertexColors[i + 1]} ${vertexColors[i + 2]}`;
+      return ` ${getNumber(vertexColors[i])} ${getNumber(vertexColors[i + 1])} ${getNumber(vertexColors[i + 2])}`;
     };
 
     for (let i = 0; i < positions.length; i += 3) {
-      output += `v ${positions[i]} ${positions[i + 1]} ${positions[i + 2]}${getVertexColors(i)}\n`;
+      output += `v ${getNumber(positions[i])} ${getNumber(positions[i + 1])} ${getNumber(positions[i + 2])}${getVertexColors(i)}\n`;
     }
   }
 
   // texture vertices
   if (uvs) {
     for (let i = 0; i < uvs.length; i += 2) {
-      output += `vt ${uvs[i]} ${uvs[i + 1]}\n`;
+      output += `vt ${getNumber(uvs[i])} ${getNumber(uvs[i + 1])}\n`;
     }
   }
 
   // vertex normals
   if (normals) {
     for (let i = 0; i < normals.length; i += 3) {
-      output += `vn ${normals[i]} ${normals[i + 1]} ${normals[i + 2]}\n`;
+      output += `vn ${getNumber(normals[i])} ${getNumber(normals[i + 1])} ${getNumber(normals[i + 2])}\n`;
     }
   }
 
@@ -84,11 +95,17 @@ function geomExportObj(geometries, options = {}) {
     header = `# geom-export-obj\n`,
     prefix = `Mesh_`,
     offsets = { positions: 0, normals: 0, uvs: 0 },
+    precision,
   } = options;
 
   return (Array.isArray(geometries) ? geometries : [geometries]).reduce(
     (current, geometry, index) => {
-      current.output += parse(geometry, current.offsets, `${prefix}${index}`);
+      current.output += parse(
+        geometry,
+        current.offsets,
+        `${prefix}${index}`,
+        precision,
+      );
 
       if (geometry.positions) {
         current.offsets.positions += geometry.positions.length / 3;

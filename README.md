@@ -10,7 +10,7 @@
 [![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
 [![license](https://img.shields.io/github/license/dmnsgn/geom-export-obj)](https://github.com/dmnsgn/geom-export-obj/blob/main/LICENSE.md)
 
-Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs/vertexColors) into an OBJ string.
+Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs/vertexColors) into an OBJ string (optionally optimized with number precision to reduce its size).
 
 [![paypal](https://img.shields.io/badge/donate-paypal-informational?logo=paypal)](https://paypal.me/dmnsgn)
 [![coinbase](https://img.shields.io/badge/donate-coinbase-informational?logo=coinbase)](https://commerce.coinbase.com/checkout/56cbdf28-e323-48d8-9c98-7019e72c97f3)

@@ -20,6 +20,7 @@
  * @property {string} [header=# geom-export-obj\n] Header to be prepended to the file.
  * @property {string} [prefix=Mesh_] Prefix for object names.
  * @property {GeomExportObjOffsets} [offsets={ positions: 0, normals: 0, uvs: 0 }] The initial offsets for cells.
+ * @property {number} [precision] Decimal digit precision for positions/normals/uvs/vertexColors.
  */
 
 /**

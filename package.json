@@ -1,7 +1,7 @@
 {
   "name": "geom-export-obj",
   "version": "2.0.0",
-  "description": "Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs/vertexColors) into an OBJ string.",
+  "description": "Convert one (or more) simplicial complex geometry (positions/cells/normals/uvs/vertexColors) into an OBJ string (optionally optimized with number precision to reduce its size).",
   "keywords": [
     "geom",
     "simplicial-complex",

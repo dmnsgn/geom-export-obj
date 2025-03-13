@@ -40,15 +40,15 @@
   "types": "types/index.d.ts",
   "devDependencies": {
     "cameras": "^3.1.1",
-    "core-js": "^3.37.1",
-    "es-module-shims": "^1.10.0",
+    "core-js": "^3.41.0",
+    "es-module-shims": "^2.0.10",
     "gl-matrix": "^3.4.3",
     "primitive-geometry": "^2.10.1",
-    "regl": "^2.1.0"
+    "regl": "^2.1.1"
   },
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.5.1",
-    "snowdev": ">=2.2.x"
+    "snowdev": ">=2.3.x"
   }
 }

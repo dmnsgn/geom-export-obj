@@ -1,11 +1,12 @@
-import { c as commonjsGlobal, g as getDefaultExportFromCjs } from './_chunks/polyfills-BGxG2aEf.js';
+import { g as getDefaultExportFromCjs } from './_chunks/polyfills-BR8RcFRQ.js';
 
-var regl$1 = {exports: {}};
+var regl$2 = {exports: {}};
 
+var regl = regl$2.exports;
 (function(module, exports) {
     (function(global, factory) {
         module.exports = factory() ;
-    })(commonjsGlobal, function() {
+    })(regl, function() {
         var isTypedArray = function(x) {
             return x instanceof Uint8Array || x instanceof Uint16Array || x instanceof Uint32Array || x instanceof Int8Array || x instanceof Int16Array || x instanceof Int32Array || x instanceof Float32Array || x instanceof Float64Array || x instanceof Uint8ClampedArray;
         };
@@ -712,7 +713,7 @@ var regl$1 = {exports: {}};
             };
             var onDestroy = function() {};
             if (typeof args === 'string') {
-                check$1(typeof document !== 'undefined', 'selector queries only supported in DOM enviroments');
+                check$1(typeof document !== 'undefined', 'selector queries only supported in DOM environments');
                 element = document.querySelector(args);
                 check$1(element, 'invalid query string for element');
             } else if (typeof args === 'object') {
@@ -4413,12 +4414,9 @@ var regl$1 = {exports: {}};
                                 var name = info.name.replace('[0]', '[' + j + ']');
                                 insertActiveInfo(uniforms, new ActiveInfo(name, stringStore.id(name), gl.getUniformLocation(program, name), info));
                             }
+                        } else {
+                            insertActiveInfo(uniforms, new ActiveInfo(info.name, stringStore.id(info.name), gl.getUniformLocation(program, info.name), info));
                         }
-                        var uniName = info.name;
-                        if (info.size > 1) {
-                            uniName = uniName.replace('[0]', '');
-                        }
-                        insertActiveInfo(uniforms, new ActiveInfo(uniName, stringStore.id(uniName), gl.getUniformLocation(program, uniName), info));
                     }
                 }
                 // -------------------------------
@@ -6774,25 +6772,12 @@ var regl$1 = {exports: {}};
             function emitUniforms(env, scope, args, uniforms, filter, isBatchInnerLoop) {
                 var shared = env.shared;
                 var GL = shared.gl;
-                var definedArrUniforms = {};
                 var infix;
                 for(var i = 0; i < uniforms.length; ++i){
                     var uniform = uniforms[i];
                     var name = uniform.name;
                     var type = uniform.info.type;
-                    var size = uniform.info.size;
                     var arg = args.uniforms[name];
-                    if (size > 1) {
-                        // either foo[n] or foos, avoid define both
-                        if (!arg) {
-                            continue;
-                        }
-                        var arrUniformName = name.replace('[0]', '');
-                        if (definedArrUniforms[arrUniformName]) {
-                            continue;
-                        }
-                        definedArrUniforms[arrUniformName] = 1;
-                    }
                     var UNIFORM = env.link(uniform);
                     var LOCATION = UNIFORM + '.location';
                     var VALUE;
@@ -6824,73 +6809,55 @@ var regl$1 = {exports: {}};
                             } else {
                                 switch(type){
                                     case GL_FLOAT$8:
-                                        if (size === 1) {
-                                            check$1.commandType(value, 'number', 'uniform ' + name, env.commandStr);
-                                        } else {
-                                            check$1.command(isArrayLike(value) && value.length === size, 'uniform ' + name, env.commandStr);
-                                        }
+                                        check$1.commandType(value, 'number', 'uniform ' + name, env.commandStr);
                                         infix = '1f';
                                         break;
                                     case GL_FLOAT_VEC2:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 2 === 0 && value.length <= size * 2, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 2, 'uniform ' + name, env.commandStr);
                                         infix = '2f';
                                         break;
                                     case GL_FLOAT_VEC3:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 3 === 0 && value.length <= size * 3, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 3, 'uniform ' + name, env.commandStr);
                                         infix = '3f';
                                         break;
                                     case GL_FLOAT_VEC4:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 4 === 0 && value.length <= size * 4, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 4, 'uniform ' + name, env.commandStr);
                                         infix = '4f';
                                         break;
                                     case GL_BOOL:
-                                        if (size === 1) {
-                                            check$1.commandType(value, 'boolean', 'uniform ' + name, env.commandStr);
-                                        } else {
-                                            check$1.command(isArrayLike(value) && value.length === size, 'uniform ' + name, env.commandStr);
-                                        }
+                                        check$1.commandType(value, 'boolean', 'uniform ' + name, env.commandStr);
                                         infix = '1i';
                                         break;
                                     case GL_INT$3:
-                                        if (size === 1) {
-                                            check$1.commandType(value, 'number', 'uniform ' + name, env.commandStr);
-                                        } else {
-                                            check$1.command(isArrayLike(value) && value.length === size, 'uniform ' + name, env.commandStr);
-                                        }
+                                        check$1.commandType(value, 'number', 'uniform ' + name, env.commandStr);
                                         infix = '1i';
                                         break;
                                     case GL_BOOL_VEC2:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 2 === 0 && value.length <= size * 2, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 2, 'uniform ' + name, env.commandStr);
                                         infix = '2i';
                                         break;
                                     case GL_INT_VEC2:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 2 === 0 && value.length <= size * 2, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 2, 'uniform ' + name, env.commandStr);
                                         infix = '2i';
                                         break;
                                     case GL_BOOL_VEC3:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 3 === 0 && value.length <= size * 3, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 3, 'uniform ' + name, env.commandStr);
                                         infix = '3i';
                                         break;
                                     case GL_INT_VEC3:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 3 === 0 && value.length <= size * 3, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 3, 'uniform ' + name, env.commandStr);
                                         infix = '3i';
                                         break;
                                     case GL_BOOL_VEC4:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 4 === 0 && value.length <= size * 4, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 4, 'uniform ' + name, env.commandStr);
                                         infix = '4i';
                                         break;
                                     case GL_INT_VEC4:
-                                        check$1.command(isArrayLike(value) && value.length && value.length % 4 === 0 && value.length <= size * 4, 'uniform ' + name, env.commandStr);
+                                        check$1.command(isArrayLike(value) && value.length === 4, 'uniform ' + name, env.commandStr);
                                         infix = '4i';
                                         break;
                                 }
-                                if (size > 1) {
-                                    infix += 'v';
-                                    value = env.global.def('[' + Array.prototype.slice.call(value) + ']');
-                                } else {
-                                    value = isArrayLike(value) ? Array.prototype.slice.call(value) : value;
-                                }
-                                scope(GL, '.uniform', infix, '(', LOCATION, ',', value, ');');
+                                scope(GL, '.uniform', infix, '(', LOCATION, ',', isArrayLike(value) ? Array.prototype.slice.call(value) : value, ');');
                             }
                             continue;
                         } else {
@@ -6914,17 +6881,15 @@ var regl$1 = {exports: {}};
                         function emitCheck(pred, message) {
                             env.assert(scope, pred, 'bad data or missing for uniform "' + name + '".  ' + message);
                         }
-                        function checkType(type, size) {
-                            if (size === 1) {
-                                check$1(!Array.isArray(VALUE), 'must not specify an array type for uniform');
-                            }
-                            emitCheck('Array.isArray(' + VALUE + ') && typeof ' + VALUE + '[0]===" ' + type + '"' + ' || typeof ' + VALUE + '==="' + type + '"', 'invalid type, expected ' + type);
+                        function checkType(type) {
+                            check$1(!Array.isArray(VALUE), 'must not specify an array type for uniform');
+                            emitCheck('typeof ' + VALUE + '==="' + type + '"', 'invalid type, expected ' + type);
                         }
-                        function checkVector(n, type, size) {
+                        function checkVector(n, type) {
                             if (Array.isArray(VALUE)) {
-                                check$1(VALUE.length && VALUE.length % n === 0 && VALUE.length <= n * size, 'must have length of ' + (size === 1 ? '' : 'n * ') + n);
+                                check$1(VALUE.length === n, 'must have length ' + n);
                             } else {
-                                emitCheck(shared.isArrayLike + '(' + VALUE + ')&&' + VALUE + '.length && ' + VALUE + '.length % ' + n + ' === 0' + ' && ' + VALUE + '.length<=' + n * size, 'invalid vector, should have length of ' + (size === 1 ? '' : 'n * ') + n, env.commandStr);
+                                emitCheck(shared.isArrayLike + '(' + VALUE + ')&&' + VALUE + '.length===' + n, 'invalid vector, should have length ' + n, env.commandStr);
                             }
                         }
                         function checkTexture(target) {
@@ -6933,49 +6898,49 @@ var regl$1 = {exports: {}};
                         }
                         switch(type){
                             case GL_INT$3:
-                                checkType('number', size);
+                                checkType('number');
                                 break;
                             case GL_INT_VEC2:
-                                checkVector(2, 'number', size);
+                                checkVector(2);
                                 break;
                             case GL_INT_VEC3:
-                                checkVector(3, 'number', size);
+                                checkVector(3);
                                 break;
                             case GL_INT_VEC4:
-                                checkVector(4, 'number', size);
+                                checkVector(4);
                                 break;
                             case GL_FLOAT$8:
-                                checkType('number', size);
+                                checkType('number');
                                 break;
                             case GL_FLOAT_VEC2:
-                                checkVector(2, 'number', size);
+                                checkVector(2);
                                 break;
                             case GL_FLOAT_VEC3:
-                                checkVector(3, 'number', size);
+                                checkVector(3);
                                 break;
                             case GL_FLOAT_VEC4:
-                                checkVector(4, 'number', size);
+                                checkVector(4);
                                 break;
                             case GL_BOOL:
-                                checkType('boolean', size);
+                                checkType('boolean');
                                 break;
                             case GL_BOOL_VEC2:
-                                checkVector(2, 'boolean', size);
+                                checkVector(2);
                                 break;
                             case GL_BOOL_VEC3:
-                                checkVector(3, 'boolean', size);
+                                checkVector(3);
                                 break;
                             case GL_BOOL_VEC4:
-                                checkVector(4, 'boolean', size);
+                                checkVector(4);
                                 break;
                             case GL_FLOAT_MAT2:
-                                checkVector(4, 'number', size);
+                                checkVector(4);
                                 break;
                             case GL_FLOAT_MAT3:
-                                checkVector(9, 'number', size);
+                                checkVector(9);
                                 break;
                             case GL_FLOAT_MAT4:
-                                checkVector(16, 'number', size);
+                                checkVector(16);
                                 break;
                             case GL_SAMPLER_2D:
                                 checkTexture(GL_TEXTURE_2D$3);
@@ -7036,10 +7001,6 @@ var regl$1 = {exports: {}};
                         case GL_FLOAT_MAT4:
                             infix = 'Matrix4fv';
                             break;
-                    }
-                    if (infix.indexOf('Matrix') === -1 && size > 1) {
-                        infix += 'v';
-                        unroll = 1;
                     }
                     if (infix.charAt(0) === 'M') {
                         scope(GL, '.uniform', infix, '(', LOCATION, ',');
@@ -8317,8 +8278,8 @@ var regl$1 = {exports: {}};
         return wrapREGL;
     });
 
-})(regl$1);
-var reglExports = regl$1.exports;
-var regl = /*@__PURE__*/ getDefaultExportFromCjs(reglExports);
+})(regl$2);
+var reglExports = regl$2.exports;
+var regl$1 = /*@__PURE__*/ getDefaultExportFromCjs(reglExports);
 
-export { regl as default };
+export { regl$1 as default };
